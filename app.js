@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const diary_router = require('./routers/diary_router');
+const auth_router = require('./routers/auth_router');
 
 dotenv.config();
 const sync = require('./models/sync');
@@ -17,6 +18,7 @@ app.get('/', (req, res) => {
     res.send('Hello App.js');
 });
 
+app.use('/auth', auth_router);
 app.use('/diaries', diary_router);
 
 app.listen(port, () => {
