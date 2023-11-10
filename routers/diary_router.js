@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const isAuth = require('./authorization');
+
 
 // model
-const { Diary } = require('../models'); // /models/index.js { User, Post }-> db
+const { User, Diary } = require('../models'); // /models/index.js { User, Post }-> db
 
 // 일기장 목록 조회
 router.get('/', async (req, res) => {
