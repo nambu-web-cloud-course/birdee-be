@@ -4,7 +4,7 @@ const isAuth = require('./authorization');
 
 
 // model
-const { User, Diary } = require('../models'); // /models/index.js { User, Post }-> db
+const { User, Diary, UserHasDiary } = require('../models'); // /models/index.js { User, Post }-> db
 
 // 일기장 목록 조회
 router.get('/', async (req, res) => {
@@ -19,12 +19,16 @@ router.get('/', async (req, res) => {
 });
 
 // 일기장 생성
-router.post('/', async (req, res) => {
+router.post('/', isAuth, async (req, res) => {
     const new_diary = req.body;
     try {
-        // new_diary.user_id = req.user_id; // token의 user_id
-        const result = await Diary.create(new_diary);
-        console.log(result);
+        new_diary.user_id = req.user_id; // token의 user_id
+        const user = await User.findOne({
+            where: { user_id: new_diary.user_id }
+        })
+        // console.log
+        const diary = await Diary.create(new_diary);
+        await user.addDiary(diary);
         res.send({ success: true, data: new_diary });
     } catch(error) {
         res.send({ success: false, message: error.message });

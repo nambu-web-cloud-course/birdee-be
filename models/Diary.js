@@ -44,13 +44,12 @@ class Diary extends Sequelize.Model {
 
     static associate(db) {
         // 테이블 간 관계를 정의
-        db.Diary.belongsToMany(db.User, { 
-            through: 'user_diary',
-            foreignKey: 'diary_id',
+        db.Diary.belongsToMany(db.User, {
+            through: db.UserHasDiary,
+            foreignKey: 'dairy_id',
             sourceKey: 'id',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
-
          });
     }
 }

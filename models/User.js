@@ -50,9 +50,8 @@ class User extends Sequelize.Model {
 
     static associate(db) {
         // 테이블 간 관계를 정의
-        // db.User.hasMany(db.Post, { foreignKey: 'user_id', sourceKey: 'user_id' });
         db.User.belongsToMany(db.Diary, { 
-            through: 'user_diary',
+            through: db.UserHasDiary,
             foreignKey: 'user_id',
             sourceKey: 'user_id',
             onDelete: 'CASCADE',
