@@ -7,15 +7,30 @@ const isAuth = require('./authorization');
 const { User, Diary, UserHasDiary } = require('../models'); // /models/index.js { User, Post }-> db
 
 // 일기장 목록 조회
-router.get('/', async (req, res) => {
-    const diaries = await Diary.findAll({
-        attributes: ['id', 'title', 'color', 'deleted', 'is_editable', 'is_deletable', 'created_at'],
-        order: [['id', 'desc']]
+router.get('/', isAuth, async (req, res) => {
+
+    const diaries = await User.findAll({
+        attributes: ['user_id', 'name'],
+        where: { user_id: req.user_id },
+        order: [[{model: Diary}, 'id', 'desc']],
+        include: {
+            attributes: ['title', 'color', 'deleted', 'created_at'],
+            where: { deleted: false },
+            model: Diary,
+            through: {
+              attributes: ['hidden'],
+              where: { hidden: true }
+            }
+        },
+        // raw: true
     });
+    
+    // console.log("result: " + result.data);
+    result = diaries.map(el => el.get({ plain: true }));
 
     // 삭제되지 않은 일기장만 조회
-    const filtered = diaries.filter((diary) => diary.deleted === false);
-    res.send({ success: true, data: filtered});
+    // const filtered = diaries.filter((diary) => diary.deleted === false);
+    res.send({ success: true, data: diaries});
 });
 
 // 일기장 생성
@@ -26,7 +41,6 @@ router.post('/', isAuth, async (req, res) => {
         const user = await User.findOne({
             where: { user_id: new_diary.user_id }
         })
-        // console.log
         const diary = await Diary.create(new_diary);
         await user.addDiary(diary);
         res.send({ success: true, data: new_diary });
