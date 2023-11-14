@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET || "secret";
 
 // model
-const { User } = require('../models');
+const { User, Diary } = require('../models');
 
 const create_hash = (async (password, saltAround) => {
     let hashed = bcrypt.hashSync(password, saltAround);
@@ -24,6 +24,27 @@ router.post('/member', async (req, res) => {
         res.status(500).send({ success: false, message: error.message });
     }
 
+});
+
+router.get('/member', async (req, res) => {
+    const users = await User.findAll({
+        attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
+        // where: { user_id: req.user_id },
+        include: {
+            // as: "hiddenDiaries",
+            attributes: ['title', 'color', 'deleted', 'created_at'],
+            where: { deleted: false },
+            model: Diary,
+            through: {
+              attributes: ['hidden'],
+            //   where: { hidden: true }
+            }
+        },
+        // raw: true
+    });
+    
+    result = users.map(el => el.get({ plain: true }));
+    res.send({ success: true, data: result});
 });
 
 router.post('/login', async (req, res) => {
