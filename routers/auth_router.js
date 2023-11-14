@@ -32,7 +32,7 @@ router.get('/member', async (req, res) => {
         // where: { user_id: req.user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
-            attributes: ['title', 'color', 'deleted', 'created_at'],
+            attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
             where: { deleted: false },
             model: Diary,
             through: {

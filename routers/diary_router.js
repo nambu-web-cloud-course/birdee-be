@@ -61,7 +61,9 @@ router.put('/:id', async (req, res) => {
 // 일기장 삭제
 router.delete('/:id', async (req, res) => {
     const diary_id = req.params.id;
-    const result = await Diary.update(req.body, {where: {id: diary_id}});
+    const result = await Diary.update({
+        "deleted": true
+    }, {where: {id: diary_id}});
     res.send({ success: true, data: result});
 });
 
