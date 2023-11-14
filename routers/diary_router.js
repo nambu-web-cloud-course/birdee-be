@@ -14,19 +14,19 @@ router.get('/', isAuth, async (req, res) => {
         where: { user_id: req.user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
-            attributes: ['title', 'color', 'deleted', 'created_at'],
+            attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
             where: { deleted: false },
             model: Diary,
             through: {
               attributes: ['hidden'],
-              where: { hidden: true }
+              where: { hidden: false }
             }
         },
         // raw: true
     });
     
     // console.log("result: " + result.data);
-    result = diaries.map(el => el.get({ plain: true }));
+    // result = diaries.map(el => el.get({ plain: true }));
 
     // 삭제되지 않은 일기장만 조회
     // const filtered = diaries.filter((diary) => diary.deleted === false);
@@ -50,6 +50,13 @@ router.post('/', isAuth, async (req, res) => {
 });
 
 // 일기장 숨기기
+router.put('/:id', async (req, res) => {
+    const diary_id = req.params.id;
+    const result = await UserHasDiary.update({
+        "hidden": true
+    }, {where: {diary_id: diary_id}});
+    res.send({ success: true, data: result});
+});
 
 // 일기장 삭제
 router.delete('/:id', async (req, res) => {

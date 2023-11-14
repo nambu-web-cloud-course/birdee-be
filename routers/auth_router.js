@@ -30,6 +30,7 @@ router.get('/member', async (req, res) => {
     const users = await User.findAll({
         attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
         // where: { user_id: req.user_id },
+        order: [[{model: Diary}, 'id', 'desc']],
         include: {
             attributes: ['title', 'color', 'deleted', 'created_at'],
             where: { deleted: false },
