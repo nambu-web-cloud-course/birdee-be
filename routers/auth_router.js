@@ -31,20 +31,21 @@ router.get('/member', async (req, res) => {
         attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
         // where: { user_id: req.user_id },
         include: {
-            // as: "hiddenDiaries",
             attributes: ['title', 'color', 'deleted', 'created_at'],
             where: { deleted: false },
             model: Diary,
             through: {
-              attributes: ['hidden'],
-            //   where: { hidden: true }
-            }
+                attributes: ['hidden'],
+                // as: ['hiddenDiaries'],
+                where: { hidden: true },
+            },
+            required: false, // left join을 수행하기 위해 required 속성을 false로 설정
         },
         // raw: true
     });
-    
-    result = users.map(el => el.get({ plain: true }));
-    res.send({ success: true, data: result});
+    // const filtered = users.filter((user) => users[0]['Diaries.hiddenDiaries.hidden'] == true);
+    // result = users.map(el => el.get({ plain: true }));
+    res.send({ success: true, data: users});
 });
 
 router.post('/login', async (req, res) => {
