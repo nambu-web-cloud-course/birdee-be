@@ -13,6 +13,7 @@ const create_hash = (async (password, saltAround) => {
     return hashed;
 });
 
+// 회원 가입
 router.post('/member', async (req, res) => {
     const new_user = req.body;
     new_user.password = await create_hash(new_user.password, 10);
@@ -26,6 +27,7 @@ router.post('/member', async (req, res) => {
 
 });
 
+// 회원 정보 조회
 router.get('/member', isAuth, async (req, res) => {
     const result1 = await User.findOne({
         attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
@@ -88,6 +90,7 @@ router.get('/member', isAuth, async (req, res) => {
     res.send({ success: true, data: formattedResult});
 });
 
+// 로그인
 router.post('/login', async (req, res) => {
     const user = req.body;
     
@@ -113,6 +116,14 @@ router.post('/login', async (req, res) => {
     } catch(error) {
         res.send({ success: false, message: error.message });
     }
+});
+
+// 회원 정보 수정
+router.put('/member', isAuth, async (req, res) => {
+    const user_id = req.user_id;
+    const update_user = req.body;
+    const result = await User.update(update_user, {where: {user_id: user_id}});
+    res.send({ success: true, data: result});
 });
 
 module.exports = router;
