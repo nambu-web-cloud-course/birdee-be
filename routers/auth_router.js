@@ -110,8 +110,8 @@ router.post('/login', async (req, res) => {
             const compared = await bcrypt.compare(user.password, result.password);
             console.log(`${user.password} : ${result.password}, ${compared} `)
             if (compared) {
-                const token = jwt.sign({ uid: user.user_id, rol: 'user'}, secret);
-                res.send({ success: true, user_id: user.user_id, toekn: token });
+                const token = jwt.sign({ uid: user.user_id, rol: 'user'}, secret, {});
+                res.send({ success: true, user_id: user.user_id, token: token });
             } else {
                 res.send({ "success": false, message: "해당 사용자가 존재하지 않거나 비밀번호가 틀렸습니다." });
             }
