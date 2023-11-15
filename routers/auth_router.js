@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET || "secret";
 const isAuth = require('./authorization');
 
-const { User, Diary } = require('../models');
+const { User, Diary, Page } = require('../models');
 
 const create_hash = (async (password, saltAround) => {
     let hashed = bcrypt.hashSync(password, saltAround);
@@ -29,9 +29,10 @@ router.post('/member', async (req, res) => {
 
 // 회원 정보 조회
 router.get('/member', isAuth, async (req, res) => {
+    const user_id = req.user_id;
     const result1 = await User.findOne({
         attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
-        where: { user_id: req.user_id },
+        where: { user_id: user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
             attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
@@ -46,7 +47,7 @@ router.get('/member', isAuth, async (req, res) => {
     });
     const result2 = await User.findOne({
         attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
-        where: { user_id: req.user_id },
+        where: { user_id: user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
             attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
@@ -55,6 +56,8 @@ router.get('/member', isAuth, async (req, res) => {
             required: false, // left join을 수행하기 위해 required 속성을 false로 설정
         },
     });
+
+    const { count } = await Page.findAndCountAll({where: { user_id: user_id }});
     
     const hiddenDiaries = result1.Diaries.map(diary => {
         return {
@@ -81,7 +84,7 @@ router.get('/member', isAuth, async (req, res) => {
         name: result1.name,
         birth: result1.birth,
         allow_random: result1.allow_random,
-        pages_count: 0,
+        pages_count: count,
         create_at: result1.create_at,
         hiddenDiaries: hiddenDiaries,
         deletedDiaries: deletedDiaries
