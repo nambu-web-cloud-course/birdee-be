@@ -7,7 +7,8 @@ class User extends Sequelize.Model {
                 user_id: {
                     type: Sequelize.STRING(20),
                     allowNull: false,
-                    unique: true
+                    unique: true,
+                    primaryKey: true
                 },
                 password: {
                     type: Sequelize.STRING(100),
@@ -58,6 +59,8 @@ class User extends Sequelize.Model {
             onUpdate: 'CASCADE'
 
          });
+         db.User.hasOne(db.Page, { foreignKey: 'user_id', sourceKey: 'user_id' });
+
     }
 }
 
