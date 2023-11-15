@@ -3,8 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const secret = process.env.JWT_SECRET || "secret";
+const isAuth = require('./authorization');
 
-// model
 const { User, Diary } = require('../models');
 
 const create_hash = (async (password, saltAround) => {
@@ -26,10 +26,10 @@ router.post('/member', async (req, res) => {
 
 });
 
-router.get('/member', async (req, res) => {
+router.get('/member', isAuth, async (req, res) => {
     const users = await User.findAll({
         attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
-        // where: { user_id: req.user_id },
+        where: { user_id: req.user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
             attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
@@ -44,8 +44,6 @@ router.get('/member', async (req, res) => {
         },
         // raw: true
     });
-    // const filtered = users.filter((user) => users[0]['Diaries.hiddenDiaries.hidden'] == true);
-    // result = users.map(el => el.get({ plain: true }));
     res.send({ success: true, data: users});
 });
 
