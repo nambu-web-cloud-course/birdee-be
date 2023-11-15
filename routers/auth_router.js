@@ -27,7 +27,7 @@ router.post('/member', async (req, res) => {
 });
 
 router.get('/member', isAuth, async (req, res) => {
-    const users = await User.findAll({
+    const result1 = await User.findOne({
         attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
         where: { user_id: req.user_id },
         order: [[{model: Diary}, 'id', 'desc']],
@@ -37,14 +37,55 @@ router.get('/member', isAuth, async (req, res) => {
             model: Diary,
             through: {
                 attributes: ['hidden'],
-                // as: ['hiddenDiaries'],
                 where: { hidden: true },
             },
             required: false, // left join을 수행하기 위해 required 속성을 false로 설정
         },
-        // raw: true
     });
-    res.send({ success: true, data: users});
+    const result2 = await User.findOne({
+        attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
+        where: { user_id: req.user_id },
+        order: [[{model: Diary}, 'id', 'desc']],
+        include: {
+            attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
+            where: { deleted: true },
+            model: Diary,
+            required: false, // left join을 수행하기 위해 required 속성을 false로 설정
+        },
+    });
+    
+    const hiddenDiaries = result1.Diaries.map(diary => {
+        return {
+            id: diary.id,
+            title: diary.title,
+            color: diary.color,
+            created_at: diary.created_at,
+            hidden: diary.UserHasDiary.hidden
+        }
+    })
+
+    const deletedDiaries = result2.Diaries.map(diary => {
+        return {
+            id: diary.id,
+            title: diary.title,
+            color: diary.color,
+            created_at: diary.created_at,
+            deleted: diary.deleted
+        }
+    })
+
+    const formattedResult = {
+        diary_id: result1.id,
+        name: result1.name,
+        birth: result1.birth,
+        allow_random: result1.allow_random,
+        pages_count: 0,
+        create_at: result1.create_at,
+        hiddenDiaries: hiddenDiaries,
+        deletedDiaries: deletedDiaries
+    }
+
+    res.send({ success: true, data: formattedResult});
 });
 
 router.post('/login', async (req, res) => {
