@@ -106,15 +106,18 @@ router.post('/login', async (req, res) => {
 
     try {
         const result = await User.findOne(options);
+        console.log(result);
         if (result) {
             const compared = await bcrypt.compare(user.password, result.password);
             console.log(`${user.password} : ${result.password}, ${compared} `)
             if (compared) {
                 const token = jwt.sign({ uid: user.user_id, rol: 'user'}, secret, {});
                 res.send({ success: true, user_id: user.user_id, token: token });
-            } else {
-                res.send({ "success": false, message: "해당 사용자가 존재하지 않거나 비밀번호가 틀렸습니다." });
+            } else { // 비밀번호가 틀렸을 경우
+                res.status(400).send({ "success": false, message: "incorrect password" });
             }
+        } else {
+            res.status(400).send({ "success": false, message: `not registered username: ${user.user_id}` });
         }
     } catch(error) {
         res.send({ success: false, message: error.message });
