@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "dbuser",
-    "password": "dbuser",
-    "database": "devbirdee",
-    "host": "localhost",
+    "username": "birdee",
+    "password": "1117B1d33",
+    "database": "birdee",
+    "host": "birdee-dbms.mysql.database.azure.com",
     "dialect": "mysql"
   },
   "test": {

@@ -51,6 +51,7 @@ class Diary extends Sequelize.Model {
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE'
          });
+         db.Diary.hasOne(db.Page, { foreignKey: 'diary_id', sourceKey: 'id' });
     }
 }
 
