@@ -124,10 +124,16 @@ router.post('/:diary_id/pages', isAuth, async (req, res) => {
 
 // 일기 페이지 수정
 router.put('/:diary_id/pages/:page_id', async (req, res) => {
-    // const diary_id = req.params.diary_id;
     const page_id = req.params.page_id;
     const update_page = req.body;
     const result = await Page.update(update_page, {where: {id: page_id}});
+    res.send({ success: true, data: result});
+});
+
+// 일기 페이지 삭제
+router.delete('/:diary_id/pages/:page_id', async (req, res) => {
+    const page_id = req.params.page_id;
+    const result = await Page.destroy({where: {id: page_id}});
     res.send({ success: true, data: result});
 });
 
