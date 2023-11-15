@@ -126,4 +126,11 @@ router.put('/member', isAuth, async (req, res) => {
     res.send({ success: true, data: result});
 });
 
+// 회원 탈퇴
+router.delete('/member', isAuth, async (req, res) => {
+    const user_id = req.user_id;
+    const result = await User.destroy({where: {user_id: user_id}});
+    res.send({ success: true, data: result});
+});
+
 module.exports = router;
