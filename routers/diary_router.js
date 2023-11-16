@@ -188,31 +188,30 @@ router.get('/:diary_id/pages', async (req, res) => {
         ],
     });
      
+    let pages = [];
     if (result[0].Page != null) {
-        const pages = result.map(diary => {
+        pages = result.map(diary => {
             return {
                 page_id: diary.Page.id,
                 subject: diary.Page.subject,
                 contents: diary.Page.contents,
-                created_at: diary.Page.created_at,
+                created_at: diary.Page.dataValues.created_at,
                 user_id: diary.Page.User.user_id,
                 name: diary.Page.User.name,
             }
         })
-        
-        const formattedResult = {
-            diary_id: result[0].id,
-            title: result[0].title,
-            color: result[0].color,
-            is_editable: result[0].is_editable,
-            is_deletable: result[0].is_deletable,
-            pages: pages
-        }
-
-        res.send({ success: true, data: formattedResult});
-    } else {
-        res.send({ success: true, data: result});
     }
+
+    const formattedResult = {
+        diary_id: result[0].id,
+        title: result[0].title,
+        color: result[0].color,
+        is_editable: result[0].is_editable,
+        is_deletable: result[0].is_deletable,
+        pages: pages
+    }
+
+    res.send({ success: true, data: formattedResult});
     
 });
 
