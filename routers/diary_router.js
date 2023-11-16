@@ -73,8 +73,8 @@ router.get('/', isAuth, async (req, res) => {
             where: { deleted: false },
             model: Diary,
             through: {
-              attributes: ['hidden'],
-              where: { hidden: false }
+              attributes: ['hidden', 'status'],
+              where: { hidden: false, status: "accept" }
             }
         },
         // raw: true
