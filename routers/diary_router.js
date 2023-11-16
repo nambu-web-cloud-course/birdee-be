@@ -4,12 +4,12 @@ const isAuth = require('./authorization');
 const nodemailer = require("nodemailer");
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-
+const Sequelize = require("sequelize");
 dotenv.config();
 
 const secret = process.env.JWT_SECRET || "secret";
 // model
-const { User, Diary, UserHasDiary, Page } = require('../models');
+const { User, Diary, UserHasDiary, Page, sequelize } = require('../models');
 
 // 메일 전송
 const sendInviteMail = (async (mailInfos) => {
@@ -191,22 +191,15 @@ router.get('/:diary_id/pages', async (req, res) => {
      
     let pages = [];
     let users = [];
-    // const users = new Set();
 
     // 참여 user 찾기
-    const result2 = await Diary.findOne({
-        attributes: ['id', 'title'],
-        where: { id: diary_id },
-        // order: [[{model: User}, 'accept_date']],
-        include: {
-            attributes: ['user_id', 'name'],
-            model: User,
-            through: {
-                attributes: ['accept_date'],
-            },
-            order: [['accept_date']],
-        },
-    });
+    const [result2, metadata] = await sequelize.query(`
+            SELECT u.name, uhd.accept_date
+            FROM userhasdiary uhd, diaries d, users u
+            WHERE uhd.diary_id = d.id AND d.id = ${diary_id} AND uhd.user_id = u.user_id
+            ORDER by uhd.accept_date;
+            `)
+    console.log(result2);
 
     if (result1[0].Page != null) {
         pages = result1.map(diary => {
@@ -220,14 +213,9 @@ router.get('/:diary_id/pages', async (req, res) => {
             }
         })
     }
-    if (result2.Users != null) {
-        users = result2.Users.map(user => {
-            console.log(user.UserHasDiary.accept_date)
-            return user.name
-        })
+    if (result2 != null) {
+        users = result2.map(user => { return user.name })
     }
-
-    console.log(users);
 
     const formattedResult = {
         diary_id: result1[0].id,
