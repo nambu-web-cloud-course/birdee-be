@@ -7,6 +7,16 @@ class UserHasDiary extends Sequelize.Model {
                     type: Sequelize.BOOLEAN,
                     allowNull: false,
                     defaultValue: false
+                },
+                status: {
+                    type: Sequelize.ENUM('pending', 'accept'),
+                    allowNull: false,
+                    defaultValue: 'pending',
+                },
+                accept_date: {
+                    type: Sequelize.DATE,
+                    allowNull: true,
+                    defaultValue: Sequelize.NOW
                 }
             }, 
             {   // 테이블 설정
