@@ -87,7 +87,7 @@ router.post('/', isAuth, async (req, res) => {
         
         // 최초 생성자는 accept
         await user.addDiary(diary, {
-            through: { status: 'accept' }
+            through: { status: 'accept', accept_date: new Date() }
         });
 
         // inviteUsers 배열에 초대된 사용자의 정보를 담음
@@ -144,9 +144,10 @@ router.get('/invite', async (req, res) => {
     })
     console.log(`user_id: ${user_id}, diary_id: ${diary_id},`)
     const result = await UserHasDiary.update({
-        status: "accept"
+        status: "accept",
+        accept_date: new Date()
     }, {where: {user_id: user_id, diary_id: diary_id}});
-    res.send({ success: true, message: "초대가 수락되었습니다.", data: result});
+    res.send({ success: true, message: "초대를 수락했습니다.", data: result});
 });
 
 // 일기장 숨기기
@@ -196,16 +197,15 @@ router.get('/:diary_id/pages', async (req, res) => {
     const result2 = await Diary.findOne({
         attributes: ['id', 'title'],
         where: { id: diary_id },
-        order: [[{model: User}, 'user_id', 'desc']],
+        // order: [[{model: User}, 'accept_date']],
         include: {
             attributes: ['user_id', 'name'],
             model: User,
             through: {
-              attributes: ['accept_date'],
-            //   where: { hidden: false }
-            }
+                attributes: ['accept_date'],
+            },
+            order: [['accept_date']],
         },
-        // raw: true
     });
 
     if (result1[0].Page != null) {
@@ -220,9 +220,9 @@ router.get('/:diary_id/pages', async (req, res) => {
             }
         })
     }
-
     if (result2.Users != null) {
         users = result2.Users.map(user => {
+            console.log(user.UserHasDiary.accept_date)
             return user.name
         })
     }
@@ -241,6 +241,18 @@ router.get('/:diary_id/pages', async (req, res) => {
 
     res.send({ success: true, data: formattedResult});
     
+});
+
+// 일기 페이지 조회
+router.get('/:diary_id/pages/:page_id', async (req, res) => {
+    const page_id = req.params.page_id;
+    console.log(req.params.page_id);
+    try {
+        const result = await Page.findOne({where: { id: page_id }});
+        res.send({ success: true, page: result });
+    } catch(error) {
+        res.send({ success: false, message: error.message });
+    }
 });
 
 // 일기 페이지 생성

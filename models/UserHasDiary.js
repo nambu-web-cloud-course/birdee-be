@@ -16,7 +16,6 @@ class UserHasDiary extends Sequelize.Model {
                 accept_date: {
                     type: Sequelize.DATE,
                     allowNull: true,
-                    defaultValue: Sequelize.NOW
                 }
             }, 
             {   // 테이블 설정
