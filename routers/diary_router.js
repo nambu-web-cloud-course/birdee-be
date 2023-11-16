@@ -28,12 +28,27 @@ const sendInviteMail = (async (mailInfos) => {
         const url = `http://localhost:${process.env.PORT}/diaries/invite?token=${mailInfo.token}`;
         console.log(url);
         console.log(mailInfo.email);
+
+        console.log(mailInfo.token);
         const mailOptions = {
             from: process.env.MAIL_USER,
             to: mailInfo.email,
-            subject: 'Nodemailer Test',
-            text: 'hello 요즘 어때',
-            html: "<p>아래 링크를 누르면 그룹으로 초대됩니다.</p>" + "<a href=" + url + ">수락하기</a>"
+            subject: '초대 메일 Test',
+            html: `<html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Invitation Page</title>
+            </head>
+            <body>
+              <h1>Invitation Page</h1>
+              <form action="http://localhost:${process.env.PORT}/diaries/invite" method="POST"
+                    enctype="application/x-www-form-urlencoded">
+                <input type="hidden" name="token" value="${mailInfo.token}">
+                <button type="submit">초대 수락</button>
+              </form>
+            </body>
+            </html>`
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -64,12 +79,7 @@ router.get('/', isAuth, async (req, res) => {
         },
         // raw: true
     });
-    
-    // console.log("result: " + result.data);
-    // result = diaries.map(el => el.get({ plain: true }));
 
-    // 삭제되지 않은 일기장만 조회
-    // const filtered = diaries.filter((diary) => diary.deleted === false);
     res.send({ success: true, data: diaries});
 });
 
@@ -114,12 +124,6 @@ router.post('/', isAuth, async (req, res) => {
             }
         })
 
-        // const emails = inviteUsersInfo.map(inviteUser => {
-        //     return inviteUser.email
-        // })
-        // console.log(tokens);
-        // console.log(emails);
-
         sendInviteMail(mailInfos);
         
         res.send({ success: true,  message: '일기장 초대 메일이 발송되었습니다.', data: new_diary });
@@ -129,9 +133,9 @@ router.post('/', isAuth, async (req, res) => {
 });
 
 // 일기장 초대 수락하기
-router.get('/invite', async (req, res) => {
+router.post('/invite', async (req, res) => {
     // todo: 로그인한 user인지 확인
-    const token = req.query.token;
+    const token = req.body.token;
     let user_id, email, diary_id;
     const inviteInfo = jwt.verify(token, secret, (error, decoded) => {
         if (error) {
@@ -216,6 +220,7 @@ router.get('/:diary_id/pages', async (req, res) => {
     if (result2 != null) {
         users = result2.map(user => { return user.name })
     }
+
 
     const formattedResult = {
         diary_id: result1[0].id,
