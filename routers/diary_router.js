@@ -173,7 +173,7 @@ router.delete('/:id', async (req, res) => {
 router.get('/:diary_id/pages', async (req, res) => {
     const diary_id = req.params.diary_id;
     
-    const result = await Diary.findAll({
+    const result1 = await Diary.findAll({
         attributes: ['id', 'title', 'color', 'is_editable', 'is_deletable'],
         where: { id: diary_id },
         order: [[{model: Page}, 'created_at', 'desc']],
@@ -189,8 +189,27 @@ router.get('/:diary_id/pages', async (req, res) => {
     });
      
     let pages = [];
-    if (result[0].Page != null) {
-        pages = result.map(diary => {
+    let users = [];
+    // const users = new Set();
+
+    // 참여 user 찾기
+    const result2 = await Diary.findOne({
+        attributes: ['id', 'title'],
+        where: { id: diary_id },
+        order: [[{model: User}, 'user_id', 'desc']],
+        include: {
+            attributes: ['user_id', 'name'],
+            model: User,
+            through: {
+              attributes: ['accept_date'],
+            //   where: { hidden: false }
+            }
+        },
+        // raw: true
+    });
+
+    if (result1[0].Page != null) {
+        pages = result1.map(diary => {
             return {
                 page_id: diary.Page.id,
                 subject: diary.Page.subject,
@@ -202,12 +221,21 @@ router.get('/:diary_id/pages', async (req, res) => {
         })
     }
 
+    if (result2.Users != null) {
+        users = result2.Users.map(user => {
+            return user.name
+        })
+    }
+
+    console.log(users);
+
     const formattedResult = {
-        diary_id: result[0].id,
-        title: result[0].title,
-        color: result[0].color,
-        is_editable: result[0].is_editable,
-        is_deletable: result[0].is_deletable,
+        diary_id: result1[0].id,
+        title: result1[0].title,
+        color: result1[0].color,
+        is_editable: result1[0].is_editable,
+        is_deletable: result1[0].is_deletable,
+        users: users,
         pages: pages
     }
 
