@@ -31,7 +31,7 @@ router.post('/member', async (req, res) => {
 router.get('/member', isAuth, async (req, res) => {
     const user_id = req.user_id;
     const result1 = await User.findOne({
-        attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
+        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'created_at'],
         where: { user_id: user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
@@ -46,7 +46,7 @@ router.get('/member', isAuth, async (req, res) => {
         },
     });
     const result2 = await User.findOne({
-        attributes: ['user_id', 'name', 'birth', 'allow_random', 'created_at'],
+        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'created_at'],
         where: { user_id: user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {

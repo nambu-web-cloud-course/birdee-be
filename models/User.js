@@ -15,10 +15,10 @@ class User extends Sequelize.Model {
                     allowNull: false,
                 },
                 name: {
-                    type: Sequelize.STRING(15),
+                    type: Sequelize.STRING(45),
                     allowNull: false,
                 },
-                name: {
+                email: {
                     type: Sequelize.STRING(45),
                     allowNull: false,
                 },
