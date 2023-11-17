@@ -57,7 +57,7 @@ router.post('/member', async (req, res) => {
 router.get('/member', isAuth, async (req, res) => {
     const user_id = req.user_id;
     const result1 = await User.findOne({
-        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'created_at'],
+        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'image', 'created_at'],
         where: { user_id: user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
@@ -155,7 +155,7 @@ router.put('/member', isAuth, upload.single('profileImg'), async (req, res) => {
     const user_id = req.user_id;
     const update_user = req.body;
     console.log('req.file: ', req.file);
-    update_user.image = `/images/${req.file.filename}`;
+    update_user.image = `/files/${req.file.filename}`;
     console.log('update_user: ', update_user);
     const result = await User.update(update_user, {where: {user_id: user_id}});
     res.send({ success: true, data: result});
