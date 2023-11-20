@@ -104,6 +104,7 @@ router.get('/member', isAuth, async (req, res) => {
     const formattedResult = {
         diary_id: result1.id,
         name: result1.name,
+        email: result1.email,
         birth: result1.birth,
         image: result1.image,
         allow_random: result1.allow_random,
