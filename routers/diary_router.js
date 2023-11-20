@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const Sequelize = require("sequelize");
 const sendInviteMail = require('./sendInviteMail');
+const { Op } = require('sequelize'); 
 dotenv.config();
 
 const secret = process.env.JWT_SECRET || "secret";
@@ -38,28 +39,46 @@ router.post('/', isAuth, async (req, res) => {
     const user_id = req.user_id; // token의 user_id
     const new_diary = req.body;
     new_diary.user_id = user_id;
+    
 
     try {
+        // 최초 생성자 user 정보 찾기
         const user = await User.findOne({
             where: { user_id: new_diary.user_id }
         })
         const diary = await Diary.create(new_diary);
-        
+
         // 최초 생성자는 accept
         await user.addDiary(diary, {
             through: { status: 'accept', accept_date: new Date() }
         });
 
-        // inviteUsers 배열에 초대된 사용자의 정보를 담음
-        const inviteUsersInfo = await Promise.all(
-            new_diary.invitedUsers.map(async (user_id) => {
-            const user = await User.findOne({
-                where: { user_id: user_id }
+        let inviteUsersInfo = [];
+
+        // 랜덤 일기일 경우: 랜덤을 허용하면서 최초 생성자가 아닌 user를 랜덤으로 선택
+        console.log(`new_diary.is_random: ${new_diary.is_random}`);
+        if (new_diary.is_random === true) {
+            const randomUser = await User.findOne({
+                order: [sequelize.fn('RAND')],
+                where: { 
+                    allow_random: true,
+                    user_id: { [Sequelize.Op.ne]: new_diary.user_id 
+                }}
             });
-            return user;
-            })
-        );
-        
+            console.log(`randomUser: ${randomUser.name}`);
+            inviteUsersInfo.push(randomUser);
+        } else {
+            // inviteUsers 배열에 초대된 사용자의 정보를 담음
+            inviteUsersInfo = await Promise.all(
+                new_diary.invitedUsers.map(async (user_id) => {
+                console.log(user_id);
+                const user = await User.findOne({
+                    where: { user_id: user_id }
+                });
+                return user;
+                })
+            );
+        }
         // 초대된 user들의 userHasDiary 데이터 생성
         const inviteUserDairyMapping = inviteUsersInfo.map(async (inviteUser) => {
             return await inviteUser.addDiary(diary);
@@ -74,7 +93,7 @@ router.post('/', isAuth, async (req, res) => {
             }
         })
 
-        sendInviteMail(mailInfos);
+        // sendInviteMail(mailInfos);
         
         res.send({ success: true,  message: '일기장 초대 메일이 발송되었습니다.', data: new_diary });
     } catch(error) {
