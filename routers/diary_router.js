@@ -156,12 +156,14 @@ router.post('/invite', async (req, res) => {
 
 // 일기장 숨기기
 router.put('/:id', isAuth, async (req, res) => {
-    const result = await UserHasDiary.update({
-        "hidden": true
-    }, { where: {
-            diary_id: req.params.id,
-            user_id: req.user_id
-        }});
+    const result = await UserHasDiary.update(
+        { hidden: Sequelize.literal('NOT hidden') },
+        { where: {
+                diary_id: req.params.id,
+                user_id: req.user_id
+        }}
+    );
+        
     res.send({ success: true, data: result});
 });
 
@@ -179,7 +181,7 @@ router.get('/:diary_id/pages', async (req, res) => {
     const diary_id = req.params.diary_id;
     
     const result1 = await Diary.findAll({
-        attributes: ['id', 'title', 'color', 'is_editable', 'is_deletable'],
+        attributes: ['id', 'title', 'color', 'deleted', 'is_editable', 'is_deletable'],
         where: { id: diary_id },
         order: [[{model: Page}, 'created_at', 'desc']],
         include: [{
@@ -188,9 +190,8 @@ router.get('/:diary_id/pages', async (req, res) => {
             include: [{
                 attributes: ['user_id', 'name'],
                 model: User
-            }]
-        },
-        ],
+            }],
+        }],
     });
      
     let pages = [];
@@ -226,6 +227,7 @@ router.get('/:diary_id/pages', async (req, res) => {
         diary_id: result1[0].id,
         title: result1[0].title,
         color: result1[0].color,
+        deleted: result1[0].deleted,
         is_editable: result1[0].is_editable,
         is_deletable: result1[0].is_deletable,
         users: users,
