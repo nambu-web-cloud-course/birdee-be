@@ -156,12 +156,22 @@ router.post('/invite', async (req, res) => {
 
 // 일기장 숨기기
 router.put('/:id', isAuth, async (req, res) => {
-    const result = await UserHasDiary.update({
-        "hidden": true
-    }, { where: {
-            diary_id: req.params.id,
-            user_id: req.user_id
-        }});
+    // const result = await UserHasDiary.update({
+    //     "hidden": true
+    // }, { where: {
+    //         diary_id: req.params.id,
+    //         user_id: req.user_id
+    // }});
+
+    const result = await UserHasDiary.update(
+        { hidden: Sequelize.literal('NOT hidden') },
+        // { "hidden": true },
+        { where: {
+                diary_id: req.params.id,
+                user_id: req.user_id
+        }}
+    );
+        
     res.send({ success: true, data: result});
 });
 
