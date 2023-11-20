@@ -35,28 +35,6 @@ const upload = multer({
     storage: azureStorage
 });
 
-// 이미지 업로드
-// try {
-//     fs.readdirSync('files');
-// } catch (error) {
-//     console.log('file 폴더 생성');
-//     fs.mkdirSync('files');
-// }
-
-// const upload = multer({ // multer 객체 생성
-//     storage: multer.diskStorage({
-//         destination(req, file, done) { // 서버에 저장할 폴더
-//             done(null, 'files/');
-//         },
-//         filename(req, file, done) {
-//             const ext = path.extname(file.originalname);
-//            done(null, path.basename(file.originalname, ext) + Date.now() + ext);
-//         },
-//     }),
-//        limits: { FileSize: 10 * 1024 * 1024}
-// })
-
-
 // 회원 가입
 router.post('/member', async (req, res) => {
     const new_user = req.body;
@@ -127,6 +105,7 @@ router.get('/member', isAuth, async (req, res) => {
         diary_id: result1.id,
         name: result1.name,
         birth: result1.birth,
+        image: result1.image,
         allow_random: result1.allow_random,
         pages_count: count,
         create_at: result1.create_at,
