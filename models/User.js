@@ -32,7 +32,7 @@ class User extends Sequelize.Model {
                     allowNull: true
                 },
                 image: { // image url
-                    type: Sequelize.STRING(100),
+                    type: Sequelize.STRING(1000),
                     allowNull: true,
                 }
             }, 
