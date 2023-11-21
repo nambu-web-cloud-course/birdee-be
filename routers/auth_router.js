@@ -58,7 +58,7 @@ router.get('/member', isAuth, async (req, res) => {
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
             attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
-            where: { deleted: false },
+            where: { deleted: 'undeleted' },
             model: Diary,
             through: {
                 attributes: ['hidden'],
@@ -73,7 +73,7 @@ router.get('/member', isAuth, async (req, res) => {
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
             attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
-            where: { deleted: true },
+            where: { deleted: 'scheduled' },
             model: Diary,
             required: false, // left join을 수행하기 위해 required 속성을 false로 설정
         },

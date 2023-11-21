@@ -14,9 +14,9 @@ class Diary extends Sequelize.Model {
                     defaultValue: 0
                 },
                 deleted: {
-                    type: Sequelize.BOOLEAN,
+                    type: Sequelize.ENUM('undeleted', 'scheduled', 'completed'),
                     allowNull: false,
-                    defaultValue: false
+                    defaultValue: 'undeleted',
                 }, 
                 is_editable: {
                     type: Sequelize.BOOLEAN,
@@ -36,8 +36,6 @@ class Diary extends Sequelize.Model {
                 modelName: 'Diary', // 모델이름
                 tableName: 'diaries', // 테이블이름
                 paranoid: true, // true이면 deletedAt컬럼이 자동으로 생성되고 삭제시 삭제하지 않음
-                // charset: 'utf8', // 인코딩
-                // collate: 'utf8_general_ci', // 정렬시 비교기준
                 charset: 'utf8mb4',
                 collate: 'utf8mb4_unicode_ci'
             }

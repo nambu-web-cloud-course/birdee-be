@@ -30,6 +30,10 @@ class UserHasDiary extends Sequelize.Model {
             }
         )
     }
+
+    static associate(db) {
+        db.UserHasDiary.belongsTo(db.Category, { foreignKey: 'category_id', sourceKey: 'id' });
+    }
 }
 
 module.exports = UserHasDiary;

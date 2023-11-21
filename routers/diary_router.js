@@ -21,7 +21,7 @@ router.get('/', isAuth, async (req, res) => {
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
             attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
-            where: { deleted: false },
+            where: { deleted: 'undeleted' },
             model: Diary,
             through: {
               attributes: ['hidden', 'status'],
@@ -140,7 +140,7 @@ router.put('/:id', isAuth, async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const diary_id = req.params.id;
     const result = await Diary.update({
-        "deleted": true
+        "deleted": 'scheduled'
     }, {where: {id: diary_id}});
     res.send({ success: true, data: result});
 });

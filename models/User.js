@@ -60,6 +60,7 @@ class User extends Sequelize.Model {
 
          });
          db.User.hasOne(db.Page, { foreignKey: 'user_id', sourceKey: 'user_id' });
+         db.User.hasMany(db.Category, { foreignKey: 'user_id', sourceKey: 'user_id' });
 
     }
 }
