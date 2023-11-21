@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const MulterAzureStorage = require('multer-azure-blob-storage').MulterAzureStorage;
+const path = require('path');
+const fs = require('fs');
 const secret = process.env.JWT_SECRET || "secret";
 const isAuth = require('./authorization');
 
@@ -11,6 +15,24 @@ const create_hash = (async (password, saltAround) => {
     let hashed = bcrypt.hashSync(password, saltAround);
     console.log(`${password} : ${hashed}`);
     return hashed;
+});
+
+const getBlobName = (req, file) => {
+    const ext = path.extname(file.originalname);
+    return path.basename(file.originalname, ext) + Date.now() + ext; // 파일명과 확장자 분리 후 현재시각을 붙임
+};
+
+const azureStorage = new MulterAzureStorage({
+    connectionString: process.env.CONNECTION_STRING,
+    accessKey: process.env.AZURE_KEY,
+    accountName: process.env.ACCOUNT_NAME,
+    containerName: 'images', 
+    blobName: getBlobName,
+    limits: { FileSize: 10 * 1024 * 1024 }
+});
+
+const upload = multer({
+    storage: azureStorage
 });
 
 // 회원 가입
@@ -31,7 +53,7 @@ router.post('/member', async (req, res) => {
 router.get('/member', isAuth, async (req, res) => {
     const user_id = req.user_id;
     const result1 = await User.findOne({
-        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'created_at'],
+        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'image', 'created_at'],
         where: { user_id: user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
@@ -82,7 +104,9 @@ router.get('/member', isAuth, async (req, res) => {
     const formattedResult = {
         diary_id: result1.id,
         name: result1.name,
+        email: result1.email,
         birth: result1.birth,
+        image: result1.image,
         allow_random: result1.allow_random,
         pages_count: count,
         create_at: result1.create_at,
@@ -125,12 +149,18 @@ router.post('/login', async (req, res) => {
 });
 
 // 회원 정보 수정
-router.put('/member', isAuth, async (req, res) => {
+router.put('/member', isAuth, upload.single('profileImg'), async (req, res) => { // 하나의 파일 전송
     const user_id = req.user_id;
     const update_user = req.body;
+    if (req.file) {
+        console.log('req.file: ', req.file);
+        update_user.image = req.file.url;
+    }
+    // update_user.image = req.file.url;
+    console.log(update_user);
     const result = await User.update(update_user, {where: {user_id: user_id}});
     res.send({ success: true, data: result});
-});
+})
 
 // 회원 탈퇴
 router.delete('/member', isAuth, async (req, res) => {
