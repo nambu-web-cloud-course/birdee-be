@@ -152,8 +152,11 @@ router.post('/login', async (req, res) => {
 router.put('/member', isAuth, upload.single('profileImg'), async (req, res) => { // 하나의 파일 전송
     const user_id = req.user_id;
     const update_user = req.body;
-    console.log('req.file: ', req.file);
-    update_user.image = req.file.url;
+    if (req.file) {
+        console.log('req.file: ', req.file);
+        update_user.image = req.file.url;
+    }
+    // update_user.image = req.file.url;
     console.log(update_user);
     const result = await User.update(update_user, {where: {user_id: user_id}});
     res.send({ success: true, data: result});
