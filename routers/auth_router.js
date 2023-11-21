@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
+const MulterAzureStorage = require('multer-azure-blob-storage').MulterAzureStorage;
 const path = require('path');
 const fs = require('fs');
 const secret = process.env.JWT_SECRET || "secret";
@@ -16,28 +17,23 @@ const create_hash = (async (password, saltAround) => {
     return hashed;
 });
 
+const getBlobName = (req, file) => {
+    const ext = path.extname(file.originalname);
+    return path.basename(file.originalname, ext) + Date.now() + ext; // 파일명과 확장자 분리 후 현재시각을 붙임
+};
 
-// 이미지 업로드
-try {
-    fs.readdirSync('files');
-} catch (error) {
-    console.log('file 폴더 생성');
-    fs.mkdirSync('files');
-}
+const azureStorage = new MulterAzureStorage({
+    connectionString: process.env.CONNECTION_STRING,
+    accessKey: process.env.AZURE_KEY,
+    accountName: process.env.ACCOUNT_NAME,
+    containerName: 'images', 
+    blobName: getBlobName,
+    limits: { FileSize: 10 * 1024 * 1024 }
+});
 
-const upload = multer({ // multer 객체 생성
-    storage: multer.diskStorage({
-        destination(req, file, done) { // 서버에 저장할 폴더
-            done(null, 'files/');
-        },
-        filename(req, file, done) {
-            const ext = path.extname(file.originalname);
-           done(null, path.basename(file.originalname, ext) + Date.now() + ext);
-        },
-    }),
-       limits: { FileSize: 10 * 1024 * 1024}
-})
-
+const upload = multer({
+    storage: azureStorage
+});
 
 // 회원 가입
 router.post('/member', async (req, res) => {
@@ -108,7 +104,9 @@ router.get('/member', isAuth, async (req, res) => {
     const formattedResult = {
         diary_id: result1.id,
         name: result1.name,
+        email: result1.email,
         birth: result1.birth,
+        image: result1.image,
         allow_random: result1.allow_random,
         pages_count: count,
         create_at: result1.create_at,
@@ -154,9 +152,12 @@ router.post('/login', async (req, res) => {
 router.put('/member', isAuth, upload.single('profileImg'), async (req, res) => { // 하나의 파일 전송
     const user_id = req.user_id;
     const update_user = req.body;
-    console.log('req.file: ', req.file);
-    update_user.image = `/files/${req.file.filename}`;
-    console.log('update_user: ', update_user);
+    if (req.file) {
+        console.log('req.file: ', req.file);
+        update_user.image = req.file.url;
+    }
+    // update_user.image = req.file.url;
+    console.log(update_user);
     const result = await User.update(update_user, {where: {user_id: user_id}});
     res.send({ success: true, data: result});
 })
