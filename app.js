@@ -31,4 +31,4 @@ app.use('/category', category_router);
 
 app.listen(port, () => {
     console.log(`Server Listening at ${port}`);
-});
+}); 

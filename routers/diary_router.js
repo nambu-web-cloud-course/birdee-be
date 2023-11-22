@@ -9,7 +9,6 @@ const { Op } = require('sequelize');
 dotenv.config();
 
 const secret = process.env.JWT_SECRET || "secret";
-// model
 const { User, Diary, UserHasDiary, Page, sequelize } = require('../models');
 
 // 일기장 목록 조회
@@ -28,7 +27,6 @@ router.get('/', isAuth, async (req, res) => {
               where: { hidden: false, status: "accept" }
             }
         },
-        // raw: true
     });
 
     res.send({ success: true, data: diaries});
@@ -123,7 +121,7 @@ router.post('/invite', async (req, res) => {
     res.send({ success: true, message: "초대를 수락했습니다.", data: result});
 });
 
-// 일기장 숨기기
+// 일기장 숨기기/숨김해제
 router.put('/:id', isAuth, async (req, res) => {
     const result = await UserHasDiary.update(
         { hidden: Sequelize.literal('NOT hidden') },
@@ -140,7 +138,7 @@ router.put('/:id', isAuth, async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const diary_id = req.params.id;
     const result = await Diary.update({
-        "deleted": 'scheduled'
+        "deleted": 'scheduled' //삭제 예정
     }, {where: {id: diary_id}});
     res.send({ success: true, data: result});
 });

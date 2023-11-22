@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const Sequelize = require("sequelize");
 
 dotenv.config();
-const { Category } = require('../models');
+const { Category, Diary, UserHasDiary } = require('../models');
 
 // 카테고리 생성
 router.post('/', isAuth, async (req, res) => {
@@ -61,5 +61,29 @@ router.delete('/:category_id', isAuth, async (req, res) => {
         res.status(500).send({ success: false, message: error.message });
     }
 });
+
+
+// 카테고리에 다이어리 추가
+router.put('/:category_id/diaries', isAuth, async (req, res) => {
+    const user_id = req.user_id;
+    const category_id = req.params.category_id;
+    const diary_id = req.body.diary_id;
+
+    try {
+        // const userHasDiaryRecord = await UserHasDiary.findOne({
+        //     where: { user_id: user_id, diary_id: req.body.diary_id }});
+
+        // if (userHasDiaryRecord) {
+        //     res.status(201).send({ success: true, result: result });
+            
+        // }
+        const result = await UserHasDiary.update({ category_id: category_id }, {
+            where: { user_id: user_id, diary_id: diary_id }
+        });
+        res.status(201).send({ success: true, result: result });
+    } catch(error) {
+        res.status(500).send({ success: false, message: error.message });
+    }
+})
 
 module.exports = router;
