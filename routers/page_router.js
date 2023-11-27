@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
 
     // 참여 user 찾기
     const [result2, metadata] = await sequelize.query(`
-            SELECT u.name, uhd.accept_date
+            SELECT u.name, uhd.accept_date, uhd.status
             FROM userhasdiary uhd, diaries d, users u
             WHERE uhd.diary_id = d.id AND d.id = ${diary_id} AND uhd.user_id = u.user_id
             ORDER by uhd.accept_date;
@@ -51,7 +51,7 @@ router.get('/', async (req, res) => {
         })
     }
     if (result2 != null) {
-        users = result2.map(user => { return user.name })
+        users = result2.map(user => { return { name: user.name, status: user.status } })
     }
 
 
@@ -73,7 +73,7 @@ router.get('/', async (req, res) => {
 // 일기 페이지 조회
 router.get('/:page_id', async (req, res) => {
     const page_id = req.params.page_id;
-    console.log(req.params.page_id);
+    console.log(req.params.page_id);``
     try {
         const result = await Page.findOne(
             {
