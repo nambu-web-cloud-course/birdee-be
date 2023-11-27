@@ -17,7 +17,10 @@ class Diary extends Sequelize.Model {
                     type: Sequelize.ENUM('undeleted', 'scheduled', 'completed'),
                     allowNull: false,
                     defaultValue: 'undeleted',
-                }, 
+                },
+                delete_at: { // 삭제 예정 날짜. deleted가 'scheduled'로 바뀐 시각 + 7일이 입력됨
+                    type: Sequelize.DATE,
+                },
                 is_editable: {
                     type: Sequelize.BOOLEAN,
                     allowNull: false,
@@ -35,7 +38,7 @@ class Diary extends Sequelize.Model {
                 underscored: true, // 테이블명과 컬럼명을 camelCase, snake_case 선택
                 modelName: 'Diary', // 모델이름
                 tableName: 'diaries', // 테이블이름
-                paranoid: true, // true이면 deletedAt컬럼이 자동으로 생성되고 삭제시 삭제하지 않음
+                // paranoid: true, // true이면 deletedAt컬럼이 자동으로 생성되고 삭제시 삭제하지 않음
                 charset: 'utf8mb4',
                 collate: 'utf8mb4_unicode_ci'
             }

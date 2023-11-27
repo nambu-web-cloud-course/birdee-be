@@ -70,13 +70,6 @@ router.put('/:category_id/diaries', isAuth, async (req, res) => {
     const diary_id = req.body.diary_id;
 
     try {
-        // const userHasDiaryRecord = await UserHasDiary.findOne({
-        //     where: { user_id: user_id, diary_id: req.body.diary_id }});
-
-        // if (userHasDiaryRecord) {
-        //     res.status(201).send({ success: true, result: result });
-            
-        // }
         const result = await UserHasDiary.update({ category_id: category_id }, {
             where: { user_id: user_id, diary_id: diary_id }
         });

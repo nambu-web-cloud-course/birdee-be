@@ -91,7 +91,7 @@ router.post('/', isAuth, async (req, res) => {
             }
         })
 
-        // sendInviteMail(mailInfos);
+        sendInviteMail(mailInfos);
         
         res.send({ success: true,  message: '일기장 초대 메일이 발송되었습니다.', data: new_diary });
     } catch(error) {
@@ -137,8 +137,14 @@ router.put('/:id', isAuth, async (req, res) => {
 // 일기장 삭제
 router.delete('/:id', async (req, res) => {
     const diary_id = req.params.id;
+    const currentDate = new Date();
+    // const nextDay = new Date();
+    // nextDay.setDate(currentDate.getDate() + 1);
+    const nextDay = new Date(currentDate.getTime() + 60000); // 60000 밀리초 = 1분, Test용 1분뒤 삭제 예정
+    console.log(`currentDate: ${currentDate}, nextDay: ${nextDay}`);
     const result = await Diary.update({
-        "deleted": 'scheduled' //삭제 예정
+        "deleted": 'scheduled', //삭제 예정
+        "delete_at": nextDay
     }, {where: {id: diary_id}});
     res.send({ success: true, data: result});
 });

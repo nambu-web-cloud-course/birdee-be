@@ -15,7 +15,7 @@ const sendInviteMail = async (mailInfos) => {
     const info = mailInfos.map(mailInfo => {
         // 초대 링크 생성
         const url = `http://localhost:${process.env.PORT}/diaries/invite?token=${mailInfo.token}`;
-        console.log(url);
+        console.log("url:" + url);
         console.log(mailInfo.email);
 
         console.log(mailInfo.token);
@@ -31,11 +31,7 @@ const sendInviteMail = async (mailInfos) => {
             </head>
             <body>
               <h1>Invitation Page</h1>
-              <form action="http://localhost:${process.env.PORT}/diaries/invite" method="POST"
-                    enctype="application/x-www-form-urlencoded">
-                <input type="hidden" name="token" value="${mailInfo.token}">
-                <button type="submit">초대 수락</button>
-              </form>
+                <a href="${url}">수락하기</a>
             </body>
             </html>`
         };
