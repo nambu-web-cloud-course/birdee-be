@@ -75,7 +75,14 @@ router.get('/:page_id', async (req, res) => {
     const page_id = req.params.page_id;
     console.log(req.params.page_id);
     try {
-        const result = await Page.findOne({where: { id: page_id }});
+        const result = await Page.findOne(
+            {
+                where: { id: page_id },
+                include: {
+                    attributes: ['name'],
+                    model: User}
+            },
+                );
         res.send({ success: true, page: result });
     } catch(error) {
         res.send({ success: false, message: error.message });
