@@ -14,13 +14,9 @@ const sendInviteMail = async (mailInfos) => {
     // 메일 보내기
     const info = mailInfos.map(mailInfo => {
         // 초대 링크 생성
-        const url = `http://localhost:${process.env.PORT}/diaries/invite?token=${mailInfo.token}`;
-        console.log("url:" + url);
-        console.log(mailInfo.email);
-
-        console.log(mailInfo.token);
+        const url = `http://localhost:${process.env.FRONT_PORT}/diaries/invite?token=${mailInfo.token}`;
         const mailOptions = {
-            from: process.env.MAIL_USER,
+            from: process.env.MAIL_USER, 
             to: mailInfo.email,
             subject: '초대 메일 Test',
             html: `<html lang="en">

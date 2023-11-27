@@ -100,8 +100,9 @@ router.post('/', isAuth, async (req, res) => {
 });
 
 // 일기장 초대 수락하기
-router.post('/invite', async (req, res) => {
+router.post('/invite', isAuth, async (req, res) => {
     // todo: 로그인한 user인지 확인
+    const login_user_id = req.user_id; // token의 user_id
     const token = req.body.token;
     let user_id, email, diary_id;
     const inviteInfo = jwt.verify(token, secret, (error, decoded) => {
@@ -113,12 +114,17 @@ router.post('/invite', async (req, res) => {
             diary_id = decoded.did;
         }
     })
-    console.log(`user_id: ${user_id}, diary_id: ${diary_id},`)
-    const result = await UserHasDiary.update({
-        status: "accept",
-        accept_date: new Date()
-    }, {where: {user_id: user_id, diary_id: diary_id}});
-    res.send({ success: true, message: "초대를 수락했습니다.", data: result});
+
+    if (login_user_id == user_id) {
+        console.log(`user_id: ${user_id}, diary_id: ${diary_id},`)
+        const result = await UserHasDiary.update({
+            status: "accept",
+            accept_date: new Date()
+        }, {where: {user_id: user_id, diary_id: diary_id}});
+        res.send({ success: true, message: "초대를 수락했습니다.", data: result});
+    } else {
+        res.send({ success: false, message: "잘못된 접근입니다."});
+    }
 });
 
 // 일기장 숨기기/숨김해제
@@ -138,8 +144,6 @@ router.put('/:id', isAuth, async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const diary_id = req.params.id;
     const currentDate = new Date();
-    // const nextDay = new Date();
-    // nextDay.setDate(currentDate.getDate() + 1);
     const nextDay = new Date(currentDate.getTime() + 60000); // 60000 밀리초 = 1분, Test용 1분뒤 삭제 예정
     console.log(`currentDate: ${currentDate}, nextDay: ${nextDay}`);
     const result = await Diary.update({
