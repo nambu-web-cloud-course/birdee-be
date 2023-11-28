@@ -169,4 +169,22 @@ router.delete('/member', isAuth, async (req, res) => {
     res.send({ success: true, data: result});
 });
 
+// user_id 확인
+router.post('/check-user', async (req, res) => {
+    const user_id = req.body.user_id;
+    try {
+        const result = await User.findOne({
+            where: { user_id: user_id },
+        });
+        console.log(result);
+        if (result)
+            res.status(201).send({ success: true, result: "존재하는 ID입니다." });
+        else
+            res.send({ success: false, message: "존재하지 않는 ID입니다." });
+    } catch(error) {
+        res.status(500).send({ success: false, message: error.message });
+    }
+
+});
+
 module.exports = router;
