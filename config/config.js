@@ -7,6 +7,11 @@ const development = {
     database: env.MYSQL_DATABASE,
     host: env.MYSQL_HOST,
     dialect: "mysql",
+    timezone: '+09:00', // 한국 시간대
+    define: {
+        "charset": "utf8mb4",
+        "collate": "utf8mb4_unicode_ci"
+    }
 };
 
 const production = {
