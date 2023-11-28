@@ -10,26 +10,59 @@ dotenv.config();
 
 const secret = process.env.JWT_SECRET || "secret";
 const { User, Diary, UserHasDiary, Page, sequelize } = require('../models');
+const PAGE_SIZE = 3;
 
 // 일기장 목록 조회
 router.get('/', isAuth, async (req, res) => {
+    const lastId = req.query.lastId || null; // 클라이언트에서 전달한 마지막 일기장의 ID
+    const firstId = req.query.firstId || null; // 클라이언트에서 전달한 첫번째 일기장의 ID
+    console.log(`lastId ${lastId}`);
+    console.log(`firstId ${firstId}`);
 
-    const diaries = await User.findOne({
-        attributes: ['user_id', 'name'],
-        where: { user_id: req.user_id },
-        order: [[{model: Diary}, 'id', 'desc']],
-        include: {
-            attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
-            where: { deleted: 'undeleted' },
-            model: Diary,
-            through: {
-              attributes: ['hidden', 'status'],
-              where: { hidden: false, status: "accept" }
-            }
-        },
-    });
+    try {
+        const whereClause = {
+            deleted: 'undeleted',
+        };
 
-    res.send({ success: true, data: diaries});
+        if (lastId) {
+            whereClause.id = { [Op.lt]: lastId }; // lastId 이전의 일기장만 가져오기
+        }
+        if (firstId) {
+            whereClause.id = { [Op.gt]: firstId }; // firstId 이후의 일기장만 가져오기
+        }
+        
+        const result = await User.findOne({
+            attributes: ['user_id', 'name'],
+            where: { user_id: req.user_id },
+            include: {
+                attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
+                where: whereClause, // 위에서 정의한 whereClause 사용
+                model: Diary,
+                through: {
+                    attributes: ['hidden', 'status'],
+                    where: { hidden: false, status: "accept" }
+                },
+            },
+            limit: 5,
+            order: [[{model: Diary}, 'id', 'desc']],
+            subQuery: false
+        });
+
+        if (result)  {
+        const diaries = result.Diaries.map(diary => {
+            return diary;
+        })
+        // const sortedDiaries = diaries.sort((a, b) => b.id - a.id);
+        res.send({ success: true, result: diaries});
+        }   
+        
+
+        
+
+    } catch (error) {
+        console.error("일기장 목록 조회 중 오류:", error);
+        res.status(500).send({ success: false, error: "일기장 목록을 가져오는 데 문제가 발생했습니다." });
+    }
 });
 
 // 일기장 생성
@@ -86,7 +119,10 @@ router.post('/', isAuth, async (req, res) => {
         // 초대한 user들의 user_id, email, diary_id로 token 생성
         const mailInfos = inviteUsersInfo.map(inviteUser => {
             return  {
+                user_id: user_id,
+                name: user.name,
                 email: inviteUser.email,
+                title: new_diary.title,
                 token: jwt.sign({ uid: inviteUser.user_id, email: inviteUser.email, did: diary.id }, secret, {})
             }
         })
