@@ -61,26 +61,25 @@ router.get('/', isAuth, async (req, res) => {
             order: [['id', orderDirection]],
             subQuery: false
         });
-        
-        if (result.length !== 0)  {
-            let diaries = result.map(diary => {
-                return {
-                    id: diary.id,
-                    title: diary.title,
-                    color: diary.color,
-                }
-            })
 
-            if (orderDirection === 'asc') {
-                diaries = diaries.reverse(); // 내림차순 정렬
+        let diaries = result.map(diary => {
+            return {
+                id: diary.id,
+                title: diary.title,
+                color: diary.color,
             }
+        })
 
-            const formattedResult = {
-                category_id: category_id,
-                Diaries : diaries
-            }
-            res.send({ success: true, result: formattedResult});
-        }   
+        if (orderDirection === 'asc') {
+            diaries = diaries.reverse(); // 내림차순 정렬
+        }
+
+        const formattedResult = {
+            category_id: category_id,
+            Diaries : diaries
+        }
+        res.send({ success: true, result: formattedResult});
+     
     } catch (error) {   
         res.status(500).send({ success: false, error: error.message });
     }
