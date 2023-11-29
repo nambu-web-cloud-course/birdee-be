@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const router = express.Router({mergeParams: true});
 const isAuth = require('./authorization');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
@@ -20,54 +20,69 @@ router.get('/', isAuth, async (req, res) => {
     console.log(`firstId ${firstId}`);
 
     try {
-        const whereClause = {
+        const whereClauseDiary = {
             deleted: 'undeleted',
         };
 
+        const whereClauseUhd = { 
+            // user_id: req.user_id,
+            hidden: false,
+            status: 'accept',
+        };
+
         if (lastId) {
-            whereClause.id = { [Op.lt]: lastId }; // lastId 이전의 일기장만 가져오기
+            whereClauseDiary.id = { [Op.lt]: lastId }; // lastId 이전의 일기장만 가져오기
         }
         if (firstId) {
-            whereClause.id = { [Op.gt]: firstId }; // firstId 이후의 일기장만 가져오기
+            whereClauseDiary.id = { [Op.gt]: firstId }; // firstId 이후의 일기장만 가져오기
         }
 
         const orderDirection = firstId ? 'asc' : 'desc'; // 다음 페이지로 가거나 첫 페이지라면 DESC, 이전의 페이지는 ASC
-        console.log("orderDirection: " + orderDirection);
-        
-        const result = await User.findOne({
-            attributes: ['user_id', 'name'],
-            where: { user_id: req.user_id },
+
+        // 카테고리별 조회
+        const category_id = req.params.category_id;
+        if (category_id) {
+            whereClauseUhd.category_id = category_id;
+        }
+
+        const result = await Diary.findAll({
+            attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
+            where: whereClauseDiary,
             include: {
-                attributes: ['id', 'title', 'color', 'deleted', 'created_at'],
-                where: whereClause, // 위에서 정의한 whereClause 사용
-                model: Diary,
+                attributes: ['user_id', 'name'],
+                model: User,
+                where: { user_id: req.user_id, },
                 through: {
-                    attributes: ['hidden', 'status'],
-                    where: { hidden: false, status: "accept" }
+                    attributes: ['hidden', 'status', 'category_id', 'user_id'],
+                    where: whereClauseUhd
                 },
             },
-            limit: 5,
-            order: [[{model: Diary}, 'id', orderDirection]],
+            limit: PAGE_SIZE,
+            order: [['id', orderDirection]],
             subQuery: false
         });
-
-        if (result)  {
-            let diaries = result.Diaries.map(diary => {
-                return diary;
+        
+        if (result.length !== 0)  {
+            let diaries = result.map(diary => {
+                return {
+                    id: diary.id,
+                    title: diary.title,
+                    color: diary.color,
+                }
             })
+
             if (orderDirection === 'asc') {
                 diaries = diaries.reverse(); // 내림차순 정렬
             }
-            // const sortedDiaries = diaries.sort((a, b) => b.id - a.id);
-            res.send({ success: true, result: diaries});
+
+            const formattedResult = {
+                category_id: category_id,
+                Diaries : diaries
+            }
+            res.send({ success: true, result: formattedResult});
         }   
-        
-
-        
-
-    } catch (error) {
-        console.error("일기장 목록 조회 중 오류:", error);
-        res.status(500).send({ success: false, error: "일기장 목록을 가져오는 데 문제가 발생했습니다." });
+    } catch (error) {   
+        res.status(500).send({ success: false, error: error.message });
     }
 });
 
