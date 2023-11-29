@@ -52,6 +52,8 @@ router.post('/member', async (req, res) => {
 // 회원 정보 조회
 router.get('/member', isAuth, async (req, res) => {
     const user_id = req.user_id;
+
+    // hiddenDiaries
     const result1 = await User.findOne({
         attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'image', 'created_at'],
         where: { user_id: user_id },
@@ -67,6 +69,8 @@ router.get('/member', isAuth, async (req, res) => {
             required: false, // left join을 수행하기 위해 required 속성을 false로 설정
         },
     });
+    
+    // deletedDiaries
     const result2 = await User.findOne({
         attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'created_at'],
         where: { user_id: user_id },
@@ -76,6 +80,22 @@ router.get('/member', isAuth, async (req, res) => {
             where: { deleted: 'scheduled' },
             model: Diary,
             required: false, // left join을 수행하기 위해 required 속성을 false로 설정
+        },
+    });
+
+    // inviteList
+    const result3 = await Diary.findAll({
+        attributes: ['title', 'created_at'],
+        where: { deleted: 'undeleted' },
+        order: [['id', 'desc']],
+        include: {
+            attributes: ['user_id'],
+            where: { user_id: user_id },
+            model: User,
+            through: {
+                attributes: ['status'],
+                where: { status: 'pending' },
+            },
         },
     });
 
@@ -101,6 +121,18 @@ router.get('/member', isAuth, async (req, res) => {
         }
     })
 
+    const inviteList = result3.map(diary => {
+        return {
+            title: diary.title,
+            invite_date: diary.dataValues.created_at,
+            status: diary.Users[0].UserHasDiary.status
+        }
+    })
+
+    console.log(result3[0]);
+    console.log(result3[0].dataValues.created_at);
+    console.log(inviteList);
+
     const formattedResult = {
         diary_id: result1.id,
         name: result1.name,
@@ -111,7 +143,8 @@ router.get('/member', isAuth, async (req, res) => {
         pages_count: count,
         create_at: result1.create_at,
         hiddenDiaries: hiddenDiaries,
-        deletedDiaries: deletedDiaries
+        deletedDiaries: deletedDiaries,
+        inviteList: inviteList
     }
 
     res.send({ success: true, data: formattedResult});
