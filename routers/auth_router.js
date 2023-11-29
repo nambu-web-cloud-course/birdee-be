@@ -138,10 +138,10 @@ router.post('/login', async (req, res) => {
                 const token = jwt.sign({ uid: user.user_id, rol: 'user'}, secret, {});
                 res.send({ success: true, user_id: user.user_id, token: token });
             } else { // 비밀번호가 틀렸을 경우
-                res.status(400).send({ "success": false, message: "incorrect password" });
+                res.send({ "success": false, message: "incorrect password" });
             }
         } else {
-            res.status(400).send({ "success": false, message: `not registered username: ${user.user_id}` });
+            res.send({ "success": false, message: `not registered username: ${user.user_id}` });
         }
     } catch(error) {
         res.send({ success: false, message: error.message });
@@ -205,9 +205,9 @@ router.post('/check-password', isAuth, async (req, res) => {
             const compared = await bcrypt.compare(user.password, result.password);
             console.log(`${user.password} : ${result.password}, ${compared} `)
             if (compared) {
-                res.status(201).send({ "success": true, message: "비밀번호가 일치합니다." });
+                res.send({ "success": true, message: "비밀번호가 일치합니다." });
             } else { // 비밀번호가 틀렸을 경우
-                res.status(400).send({ "success": false, message: "비밀번호가 일치하지 않습니다." });
+                res.send({ success: false, message: "비밀번호가 일치하지 않습니다." });
             }
         }
     } catch(error) {
