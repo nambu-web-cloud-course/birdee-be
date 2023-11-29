@@ -187,4 +187,33 @@ router.post('/check-user', async (req, res) => {
 
 });
 
+// 비밀번호 확인
+router.post('/check-password', isAuth, async (req, res) => {
+    const user = req.body;
+    
+    options = { 
+        attributes: ['password'],
+        where: {
+            user_id: req.user_id
+        }
+    }; 
+
+    try {
+        const result = await User.findOne(options);
+        console.log(result);
+        if (result) {
+            const compared = await bcrypt.compare(user.password, result.password);
+            console.log(`${user.password} : ${result.password}, ${compared} `)
+            if (compared) {
+                res.status(201).send({ "success": true, message: "비밀번호가 일치합니다." });
+            } else { // 비밀번호가 틀렸을 경우
+                res.status(400).send({ "success": false, message: "비밀번호가 일치하지 않습니다." });
+            }
+        }
+    } catch(error) {
+        res.send({ success: false, message: error.message });
+    }
+});
+
+
 module.exports = router;
