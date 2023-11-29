@@ -30,6 +30,9 @@ router.get('/', isAuth, async (req, res) => {
         if (firstId) {
             whereClause.id = { [Op.gt]: firstId }; // firstId 이후의 일기장만 가져오기
         }
+
+        const orderDirection = firstId ? 'asc' : 'desc'; // 다음 페이지로 가거나 첫 페이지라면 DESC, 이전의 페이지는 ASC
+        console.log("orderDirection: " + orderDirection);
         
         const result = await User.findOne({
             attributes: ['user_id', 'name'],
@@ -44,16 +47,19 @@ router.get('/', isAuth, async (req, res) => {
                 },
             },
             limit: 5,
-            order: [[{model: Diary}, 'id', 'desc']],
+            order: [[{model: Diary}, 'id', orderDirection]],
             subQuery: false
         });
 
         if (result)  {
-        const diaries = result.Diaries.map(diary => {
-            return diary;
-        })
-        // const sortedDiaries = diaries.sort((a, b) => b.id - a.id);
-        res.send({ success: true, result: diaries});
+            let diaries = result.Diaries.map(diary => {
+                return diary;
+            })
+            if (orderDirection === 'asc') {
+                diaries = diaries.reverse(); // 내림차순 정렬
+            }
+            // const sortedDiaries = diaries.sort((a, b) => b.id - a.id);
+            res.send({ success: true, result: diaries});
         }   
         
 
