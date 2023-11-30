@@ -130,8 +130,8 @@ const updateUser = async (req, res) => {
         const update_user = { ...body };
 
         if (file) {
-            console.log('req.file: ', file);
-            update_user.image = file.url;
+            const imageUrl = file.url.split('?')[0]; // 만료 날짜 제거
+            update_user.image = imageUrl;
         }
 
         const result = await User.update(update_user, {where: {user_id: user_id}});
