@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router({mergeParams: true} ); // 부모 라우터에서 자식 라우터로 req.params 넘겨주기
-const isAuth = require('./authorization');
+const isAuth = require('../utils/authorization');
 const dotenv = require('dotenv');
 const Sequelize = require("sequelize");
 dotenv.config();

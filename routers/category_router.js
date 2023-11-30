@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const isAuth = require('./authorization');
+const isAuth = require('../utils/authorization');
 const dotenv = require('dotenv');
 const Sequelize = require("sequelize");
 
