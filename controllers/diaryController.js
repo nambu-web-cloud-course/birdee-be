@@ -1,9 +1,9 @@
-const { Op } = require('sequelize'); 
 const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
+const { Op } = require('sequelize');
 const dotenv = require('dotenv');
 
-const { User, Diary, UserHasDiary, sequelize } = require('../models');
+const { User, Diary, UserHasDiary } = require('../models');
 const sendInviteMail = require('../utils/sendInviteMail')
 
 dotenv.config();
@@ -119,10 +119,10 @@ const createDiary = async (req, res) => {
         console.log(`new_diary.is_random: ${new_diary.is_random}`);
         if (new_diary.is_random === true) {
             const randomUser = await User.findOne({
-                order: [sequelize.fn('RAND')],
+                order: [Sequelize.fn('RAND')],
                 where: { 
                     allow_random: true,
-                    user_id: { [Sequelize.Op.ne]: new_diary.user_id 
+                    user_id: { [Sequelize.Op.ne]: user_id
                 }}
             });
             console.log(`randomUser: ${randomUser.name}`);
