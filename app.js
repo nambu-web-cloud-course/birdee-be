@@ -25,9 +25,10 @@ app.get('/', (req, res) => {
 });
 
 app.use('/auth', auth_router);
-app.use('/diaries/:diary_id/pages', page_router);
-app.use('/diaries', diary_router);
 app.use('/category', category_router);
+app.use('/category/:category_id/diaries', diary_router); // 카테고리 별 일기장 목록
+app.use('/diaries', diary_router); // 전체 일기장 목록
+app.use('/diaries/:diary_id/pages', page_router);
 
 app.listen(port, () => {
     console.log(`Server Listening at ${port}`);
