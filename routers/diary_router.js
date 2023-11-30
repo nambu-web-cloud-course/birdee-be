@@ -99,13 +99,13 @@ router.get('/', isAuth, async (req, res) => {
 router.post('/', isAuth, async (req, res) => {
     const user_id = req.user_id; // token의 user_id
     const new_diary = req.body;
-    new_diary.user_id = user_id;
+    new_diary.owner_id = user_id;
     
 
     try {
         // 최초 생성자 user 정보 찾기
         const user = await User.findOne({
-            where: { user_id: new_diary.user_id }
+            where: { user_id: user_id }
         })
         const diary = await Diary.create(new_diary);
 

@@ -85,7 +85,7 @@ router.get('/member', isAuth, async (req, res) => {
 
     // inviteList
     const result3 = await Diary.findAll({
-        attributes: ['title', 'created_at'],
+        attributes: ['title', 'created_at', 'owner_id'],
         where: { deleted: 'undeleted' },
         order: [['id', 'desc']],
         include: {
@@ -98,6 +98,13 @@ router.get('/member', isAuth, async (req, res) => {
             },
         },
     });
+
+    const ownerIds = result3.map(diary => diary.owner_id);
+    const owners = await User.findAll({
+        attributes: ['user_id', 'name'],
+        where: { user_id: ownerIds },
+    });
+
 
     const { count } = await Page.findAndCountAll({where: { user_id: user_id }});
     
@@ -122,16 +129,16 @@ router.get('/member', isAuth, async (req, res) => {
     })
 
     const inviteList = result3.map(diary => {
+        const owner = owners.find(owner => owner.user_id === diary.owner_id);
         return {
+            owner_id: diary.owner_id,
+            owner_name: owner ? owner.name : null,
             title: diary.title,
             invite_date: diary.dataValues.created_at,
             status: diary.Users[0].UserHasDiary.status
         }
     })
 
-    console.log(result3[0]);
-    console.log(result3[0].dataValues.created_at);
-    console.log(inviteList);
 
     const formattedResult = {
         diary_id: result1.id,
@@ -163,7 +170,6 @@ router.post('/login', async (req, res) => {
 
     try {
         const result = await User.findOne(options);
-        console.log(result);
         if (result) {
             const compared = await bcrypt.compare(user.password, result.password);
             console.log(`${user.password} : ${result.password}, ${compared} `)
