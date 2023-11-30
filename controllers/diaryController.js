@@ -80,14 +80,13 @@ const getDiaries = async (req, res) => {
                 }
                 res.send({ success: true, result: formattedResult});
             }
-        } else { // 카테고리별 조회이면서, 아직 카테고리에 일기장이 추가되지 않은 경우
-            if (category_id) {
-                const formattedResult = {
-                    category_id: category_id,
-                    Diaries : []
-                }
-                res.send({ success: true, result: formattedResult});
+        } else { // 조회할 일기장이 없을 경우
+            const formattedResult = {
+                category_id: category_id,
+                Diaries : []
             }
+            res.send({ success: true, result: formattedResult});
+            
         }
      
     } catch (error) {   
