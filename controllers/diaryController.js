@@ -69,15 +69,17 @@ const getDiaries = async (req, res) => {
                 }
             })
 
-            if (orderDirection === 'asc') {
-                diaries = diaries.reverse(); // 내림차순 정렬
-            }
+            if (diaries){ 
+                if (orderDirection === 'asc') {
+                    diaries = diaries.reverse(); // 내림차순 정렬
+                }
 
-            const formattedResult = {
-                category_id: category_id,
-                Diaries : diaries
+                const formattedResult = {
+                    category_id: category_id,
+                    Diaries : diaries
+                }
+                res.send({ success: true, result: formattedResult});
             }
-            res.send({ success: true, result: formattedResult});
         } else { // 카테고리별 조회이면서, 아직 카테고리에 일기장이 추가되지 않은 경우
             if (category_id) {
                 const formattedResult = {
