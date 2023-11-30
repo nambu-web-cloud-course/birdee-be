@@ -94,15 +94,17 @@ const createPage = async (req, res) => {
 }
 
 const updatePage = async (req, res) => {
+    const user_id = req.user_id;
     const page_id = req.params.page_id;
     const update_page = req.body;
-    const result = await Page.update(update_page, {where: {id: page_id}});
+    const result = await Page.update(update_page, {where: {id: page_id, user_id: user_id}});
     res.send({ success: true, data: result});
 }
 
 const deletePage = async (req, res) => {
+    const user_id = req.user_id;
     const page_id = req.params.page_id;
-    const result = await Page.update({ "deleted": true }, {where: {id: page_id}});
+    const result = await Page.update({ "deleted": true }, {where: {id: page_id, user_id: user_id}});
     res.send({ success: true, data: result});
 }
 

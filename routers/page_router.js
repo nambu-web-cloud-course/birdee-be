@@ -18,9 +18,9 @@ router.get('/:page_id', pageController.getPage);
 router.post('/', isAuth, pageController.createPage);
 
 // 일기 페이지 수정
-router.put('/:page_id', pageController.updatePage);
+router.put('/:page_id', isAuth, pageController.updatePage);
 
 // 일기 페이지 삭제
-router.delete('/:page_id', pageController.deletePage);
+router.delete('/:page_id', isAuth, pageController.deletePage);
 
 module.exports = router;
