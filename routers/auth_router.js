@@ -25,10 +25,13 @@ router.put('/member', isAuth, upload.single('profileImg'), userController.update
 router.delete('/member', isAuth, userController.deleteUser);
 
 // user_id 확인
-router.post('/check-user', userController.checkUserId);
+router.post('/check-user', isAuth, userController.checkUserId);
 
 // 비밀번호 확인
 router.post('/check-password', isAuth, userController.checkPassword);
+
+// 비밀번호 확인
+router.put('/member/password', isAuth, userController.updatePassword);
 
 
 module.exports = router;
