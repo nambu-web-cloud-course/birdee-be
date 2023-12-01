@@ -53,7 +53,7 @@ const deleteCategory = async (req, res) => {
 const addDiaryToCategory = async (req, res) => {
     const user_id = req.user_id;
     const category_id = req.params.category_id;
-    const diary_id = req.body.diary_id;
+    const diary_id = req.params.diary_id;
 
     try {
         const result = await UserHasDiary.update({ category_id: category_id }, {
@@ -67,7 +67,7 @@ const addDiaryToCategory = async (req, res) => {
 
 const deleteDiaryFromCategory = async (req, res) => {
     const user_id = req.user_id;
-    const diary_id = req.body.diary_id;
+    const diary_id = req.params.diary_id;
 
     try {
         const result = await UserHasDiary.update({ category_id: null }, {

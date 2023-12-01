@@ -16,10 +16,10 @@ router.get('/', isAuth, categoryController.getCategoryList);
 router.delete('/:category_id', isAuth, categoryController.deleteCategory);
 
 // 카테고리에 다이어리 추가
-router.put('/:category_id/diaries', isAuth, categoryController.addDiaryToCategory)
+router.put('/:category_id/diaries/:diary_id', isAuth, categoryController.addDiaryToCategory)
 
 // 카테고리에서 다이어리 제거
-router.delete('/:category_id/diaries', isAuth, categoryController.deleteDiaryFromCategory)
+router.delete('/diaries/:diary_id', isAuth, categoryController.deleteDiaryFromCategory)
 
 
 module.exports = router;
