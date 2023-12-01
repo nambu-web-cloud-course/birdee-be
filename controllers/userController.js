@@ -220,6 +220,18 @@ const checkPassword = async (req, res) => {
     }
 }
 
+const updatePassword = async (req, res) => {
+    const user_id = req.user_id;
+    const update_user = req.body;
+    update_user.password = await createHash(update_user.password, 10);
+    try {
+        const result = await User.update(update_user, {where: {user_id: user_id}});
+        res.send({ success: true, data: result });
+    } catch (error) {
+        res.status(500).send({ success: false, message: error.message });
+    }
+};
+
 
 module.exports = {
     registerUser,
@@ -228,5 +240,6 @@ module.exports = {
     loginUser,
     deleteUser,
     checkUserId,
-    checkPassword
+    checkPassword,
+    updatePassword
 };

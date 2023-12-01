@@ -8,7 +8,7 @@ const sendInviteMail = require('../utils/sendInviteMail')
 
 dotenv.config();
 const secret = process.env.JWT_SECRET || "secret";
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 6;
 
 
 const getDiaries = async (req, res) => {
@@ -81,12 +81,13 @@ const getDiaries = async (req, res) => {
                 res.send({ success: true, result: formattedResult});
             }
         } else { // 조회할 일기장이 없을 경우
-            const formattedResult = {
-                category_id: category_id,
-                Diaries : []
+            if (category_id) {
+                const formattedResult = {
+                    category_id: category_id,
+                    Diaries : []
+                }
+                res.send({ success: true, result: formattedResult});
             }
-            res.send({ success: true, result: formattedResult});
-            
         }
      
     } catch (error) {   
@@ -129,12 +130,14 @@ const createDiary = async (req, res) => {
         } else {
             // inviteUsers 배열에 초대된 사용자의 정보를 담음
             inviteUsersInfo = await Promise.all(
-                new_diary.invitedUsers.map(async (user_id) => {
-                console.log(user_id);
-                const user = await User.findOne({
-                    where: { user_id: user_id }
-                });
-                return user;
+                new_diary.invitedUsers.map(async (invite_user_id) => {
+                    console.log(invite_user_id);
+                    if (invite_user_id == user_id) { // 초대한 user 중에 본인이 id가 있다면 생성 실패
+                        res.send({ success: false, message: "본인은 초대할 수 없습니다." });
+                    } else {
+                        const user = await User.findOne({where: { user_id: invite_user_id }});
+                        return user;
+                    }
                 })
             );
         }

@@ -13,7 +13,8 @@ const sendInviteMail = async (mailInfos) => {
     // 메일 보내기
     const info = mailInfos.map(mailInfo => {
         // 초대 링크 생성
-        const url = `http://localhost:${process.env.FRONT_PORT}/diaries/invite?token=${mailInfo.token}`;
+        // const url = `http://${process.env.FRONT_PORT}/diaries/invite?token=${mailInfo.token}`;
+        const url = `${REACT_APP_FRONTEND_HOST}/diaries/invite?token=${mailInfo.token}`;
         const mailOptions = {
             from: process.env.MAIL_USER, 
             to: mailInfo.email,
