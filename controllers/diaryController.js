@@ -8,7 +8,7 @@ const sendInviteMail = require('../utils/sendInviteMail')
 
 dotenv.config();
 const secret = process.env.JWT_SECRET || "secret";
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 6;
 
 
 const getDiaries = async (req, res) => {
@@ -81,12 +81,13 @@ const getDiaries = async (req, res) => {
                 res.send({ success: true, result: formattedResult});
             }
         } else { // 조회할 일기장이 없을 경우
-            const formattedResult = {
-                category_id: category_id,
-                Diaries : []
+            if (category_id) {
+                const formattedResult = {
+                    category_id: category_id,
+                    Diaries : []
+                }
+                res.send({ success: true, result: formattedResult});
             }
-            res.send({ success: true, result: formattedResult});
-            
         }
      
     } catch (error) {   
