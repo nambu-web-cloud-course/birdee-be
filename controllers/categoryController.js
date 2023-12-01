@@ -64,10 +64,27 @@ const addDiaryToCategory = async (req, res) => {
         res.status(500).send({ success: false, message: error.message });
     }
 }
+
+const deleteDiaryFromCategory = async (req, res) => {
+    const user_id = req.user_id;
+    const diary_id = req.body.diary_id;
+
+    try {
+        const result = await UserHasDiary.update({ category_id: null }, {
+            where: { user_id: user_id, diary_id: diary_id }
+        });
+        res.status(201).send({ success: true, result: result });
+    } catch(error) {
+        res.status(500).send({ success: false, message: error.message });
+    }
+}
+
+
 module.exports = {
     createCategory,
     updateCategoryName,
     getCategoryList,
     deleteCategory,
     addDiaryToCategory,
+    deleteDiaryFromCategory
 };
