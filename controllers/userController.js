@@ -22,7 +22,7 @@ const getUserInfo = async (req, res) => {
 
     // hiddenDiaries
     const result1 = await User.findOne({
-        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'image', 'created_at'],
+        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'image', 'message', 'created_at'],
         where: { user_id: user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
@@ -113,6 +113,7 @@ const getUserInfo = async (req, res) => {
         email: result1.email,
         birth: result1.birth,
         image: result1.image,
+        message: result1.message,
         allow_random: result1.allow_random,
         pages_count: count,
         create_at: result1.create_at,
@@ -122,6 +123,21 @@ const getUserInfo = async (req, res) => {
     }
 
     res.send({ success: true, data: formattedResult});
+}
+
+const getDiaryUserInfo = async (req, res) => {
+    const user_id = req.params.user_id;
+    try {
+        const result = await User.findOne(
+            {
+                attributes: ['user_id', 'name', 'birth', 'image', 'message'],
+                where: { user_id: user_id },
+            },
+                );
+        res.send({ success: true, page: result });
+    } catch(error) {
+        res.send({ success: false, message: error.message });
+    }
 }
 
 const updateUser = async (req, res) => {
@@ -241,5 +257,6 @@ module.exports = {
     deleteUser,
     checkUserId,
     checkPassword,
-    updatePassword
+    updatePassword,
+    getDiaryUserInfo
 };

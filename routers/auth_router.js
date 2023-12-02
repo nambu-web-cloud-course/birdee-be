@@ -14,6 +14,9 @@ router.post('/member', userController.registerUser);
 // 회원 정보 조회
 router.get('/member', isAuth, userController.getUserInfo);
 
+// 일기장에 참여한 회원 정보 조회
+router.get('/member/:user_id', isAuth, userController.getDiaryUserInfo);
+
 // 로그인
 router.post('/login', userController.loginUser);
 
