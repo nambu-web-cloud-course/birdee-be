@@ -132,35 +132,46 @@ const createDiary = async (req, res) => {
             inviteUsersInfo = await Promise.all(
                 new_diary.invitedUsers.map(async (invite_user_id) => {
                     console.log(invite_user_id);
-                    if (invite_user_id == user_id) { // 초대한 user 중에 본인이 id가 있다면 생성 실패
-                        res.send({ success: false, message: "본인은 초대할 수 없습니다." });
-                    } else {
-                        const user = await User.findOne({where: { user_id: invite_user_id }});
-                        return user;
-                    }
+                    const user = await User.findOne({where: { user_id: invite_user_id }});
+                    return user;
                 })
             );
         }
-        // 초대된 user들의 userHasDiary 데이터 생성
-        const inviteUserDairyMapping = inviteUsersInfo.map(async (inviteUser) => {
-            return await inviteUser.addDiary(diary);
-        });
-        await Promise.all(inviteUserDairyMapping);
 
-        // 초대한 user들의 user_id, email, diary_id로 token 생성
-        const mailInfos = inviteUsersInfo.map(inviteUser => {
-            return  {
-                user_id: user_id,
-                name: user.name,
-                email: inviteUser.email,
-                title: new_diary.title,
-                token: jwt.sign({ uid: inviteUser.user_id, email: inviteUser.email, did: diary.id }, secret, {})
+        let possible = false;
+        // 초대된 user 중 본인이 존재하면 fail 
+        inviteUsersInfo.forEach((inviteUser) => {
+            if (inviteUser.user_id === user_id) {
+                possible = true;
+                return;
             }
-        })
+        });
 
-        sendInviteMail(mailInfos);
-        
-        res.send({ success: true,  message: '일기장 초대 메일이 발송되었습니다.', data: new_diary });
+        if (possible) {
+            res.send({ success: false, message: "본인을 초대할 수는 없어요!" });
+        }
+        else {
+            // 초대된 user들의 userHasDiary 데이터 생성
+            const inviteUserDairyMapping = inviteUsersInfo.map(async (inviteUser) => {
+                return await inviteUser.addDiary(diary);
+            });
+            await Promise.all(inviteUserDairyMapping);
+
+            // 초대한 user들의 user_id, email, diary_id로 token 생성
+            const mailInfos = inviteUsersInfo.map(inviteUser => {
+                return  {
+                    user_id: user_id,
+                    name: user.name,
+                    email: inviteUser.email,
+                    title: new_diary.title,
+                    token: jwt.sign({ uid: inviteUser.user_id, email: inviteUser.email, did: diary.id }, secret, {})
+                }
+            })
+
+            sendInviteMail(mailInfos);
+            
+            res.send({ success: true,  message: '일기장 초대 메일이 발송되었습니다.', data: new_diary });
+        }
     } catch(error) {
         res.send({ success: false, message: error.message });
     }
