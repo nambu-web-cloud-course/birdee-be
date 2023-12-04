@@ -184,6 +184,8 @@ const checkUserId = async (req, res) => {
     try {
         if (login_id === user_id) {
             res.send({ success: false, message: "본인을 초대할 수 없습니다." });
+        } else if (user_id == null || user_id == "") {
+            res.send({ success: false, message: "아이디를 입력해주세요." });
         }
         else {
             const result = await User.findOne({
