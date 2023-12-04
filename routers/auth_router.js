@@ -27,7 +27,10 @@ router.put('/member', isAuth, upload.single('profileImg'), userController.update
 // 회원 탈퇴
 router.delete('/member', isAuth, userController.deleteUser);
 
-// user_id 확인
+// 아이디 중복 체크
+router.post('/check-user-id', userController.checkUserId);
+
+// 일기장 생성 시 user 체크
 router.post('/check-user', isAuth, userController.checkUserId);
 
 // 비밀번호 확인

@@ -192,17 +192,24 @@ const deleteUser = async (req, res) => {
     res.send({ success: true, data: result});
 }
 
+// 회원가입 시 아이디 중복체크, 일기장 생성 시 user 체크용
 const checkUserId = async (req, res) => {
+    const login_id = req.user_id; // token이 있을 경우
     const user_id = req.body.user_id;
     try {
-        const result = await User.findOne({
-            where: { user_id: user_id },
-        });
-        console.log(result);
-        if (result)
-            res.status(201).send({ success: true, result: "존재하는 ID입니다." });
-        else
-            res.send({ success: false, message: "존재하지 않는 ID입니다." });
+        if (login_id === user_id) {
+            res.send({ success: false, message: "본인을 초대할 수 없습니다." });
+        }
+        else {
+            const result = await User.findOne({
+                where: { user_id: user_id },
+            });
+            console.log(result);
+            if (result)
+                res.status(201).send({ success: true, result: "존재하는 ID입니다." });
+            else
+                res.send({ success: false, message: "존재하지 않는 ID입니다." });
+        }
     } catch(error) {
         res.status(500).send({ success: false, message: error.message });
     }

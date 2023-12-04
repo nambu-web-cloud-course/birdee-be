@@ -138,40 +138,28 @@ const createDiary = async (req, res) => {
             );
         }
 
-        let possible = false;
-        // 초대된 user 중 본인이 존재하면 fail 
-        inviteUsersInfo.forEach((inviteUser) => {
-            if (inviteUser.user_id === user_id) {
-                possible = true;
-                return;
-            }
+
+        // 초대된 user들의 userHasDiary 데이터 생성
+        const inviteUserDairyMapping = inviteUsersInfo.map(async (inviteUser) => {
+            return await inviteUser.addDiary(diary);
         });
+        await Promise.all(inviteUserDairyMapping);
 
-        if (possible) {
-            res.send({ success: false, message: "본인을 초대할 수는 없어요!" });
-        }
-        else {
-            // 초대된 user들의 userHasDiary 데이터 생성
-            const inviteUserDairyMapping = inviteUsersInfo.map(async (inviteUser) => {
-                return await inviteUser.addDiary(diary);
-            });
-            await Promise.all(inviteUserDairyMapping);
+        // 초대한 user들의 user_id, email, diary_id로 token 생성
+        const mailInfos = inviteUsersInfo.map(inviteUser => {
+            return  {
+                user_id: user_id,
+                name: user.name,
+                email: inviteUser.email,
+                title: new_diary.title,
+                token: jwt.sign({ uid: inviteUser.user_id, email: inviteUser.email, did: diary.id }, secret, {})
+            }
+        })
 
-            // 초대한 user들의 user_id, email, diary_id로 token 생성
-            const mailInfos = inviteUsersInfo.map(inviteUser => {
-                return  {
-                    user_id: user_id,
-                    name: user.name,
-                    email: inviteUser.email,
-                    title: new_diary.title,
-                    token: jwt.sign({ uid: inviteUser.user_id, email: inviteUser.email, did: diary.id }, secret, {})
-                }
-            })
-
-            sendInviteMail(mailInfos);
+        sendInviteMail(mailInfos);
             
-            res.send({ success: true,  message: '일기장 초대 메일이 발송되었습니다.', data: new_diary });
-        }
+        res.send({ success: true,  message: '일기장 초대 메일이 발송되었습니다.', data: new_diary });
+        
     } catch(error) {
         res.send({ success: false, message: error.message });
     }
