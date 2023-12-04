@@ -193,7 +193,7 @@ const checkUserId = async (req, res) => {
             });
             console.log(result);
             if (result)
-                res.status(201).send({ success: true, result: "존재하는 ID입니다." });
+                res.status(201).send({ success: true, login_id: login_id, result: "존재하는 ID입니다." });
             else
                 res.send({ success: false, message: "존재하지 않는 ID입니다." });
         }
