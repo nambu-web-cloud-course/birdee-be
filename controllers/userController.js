@@ -125,21 +125,6 @@ const getUserInfo = async (req, res) => {
     res.send({ success: true, data: formattedResult});
 }
 
-const getDiaryUserInfo = async (req, res) => {
-    const user_id = req.params.user_id;
-    try {
-        const result = await User.findOne(
-            {
-                attributes: ['user_id', 'name', 'birth', 'image', 'message'],
-                where: { user_id: user_id },
-            },
-                );
-        res.send({ success: true, page: result });
-    } catch(error) {
-        res.send({ success: false, message: error.message });
-    }
-}
-
 const updateUser = async (req, res) => {
     try {
         const { user_id, body, file } = req;
@@ -265,5 +250,4 @@ module.exports = {
     checkUserId,
     checkPassword,
     updatePassword,
-    getDiaryUserInfo
 };
