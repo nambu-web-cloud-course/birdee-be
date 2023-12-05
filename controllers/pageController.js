@@ -22,7 +22,7 @@ const getPageList = async (req, res) => {
 
     // 참여 user 찾기
     const [result2, metadata] = await sequelize.query(`
-            SELECT u.user_id, u.name, uhd.accept_date, uhd.status
+            SELECT u.user_id, u.name, u.image, u.message, u.birth, uhd.accept_date, uhd.status
             FROM userhasdiary uhd, diaries d, users u
             WHERE uhd.diary_id = d.id AND d.id = ${diary_id} AND uhd.user_id = u.user_id
             ORDER by uhd.accept_date;
@@ -43,7 +43,7 @@ const getPageList = async (req, res) => {
     }
     if (result2 != null) {
         users = result2.map(user => { 
-            return { user_id: user.user_id, name: user.name, status: user.status }
+            return { user_id: user.user_id, name: user.name, birth: user.birth, message: user.message, status: user.status, image: user.image}
         })
     }
 

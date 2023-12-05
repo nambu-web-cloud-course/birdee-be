@@ -34,7 +34,11 @@ class User extends Sequelize.Model {
                 image: { // image url
                     type: Sequelize.STRING(1000),
                     allowNull: true,
-                }
+                }, 
+                message: {
+                    type: Sequelize.STRING(100),
+                    allowNull: true,
+                },
             }, 
             {   // 테이블 설정
                 sequelize,

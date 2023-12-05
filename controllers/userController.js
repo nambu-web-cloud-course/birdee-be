@@ -22,7 +22,7 @@ const getUserInfo = async (req, res) => {
 
     // hiddenDiaries
     const result1 = await User.findOne({
-        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'image', 'created_at'],
+        attributes: ['user_id', 'name', 'email', 'birth', 'allow_random', 'image', 'message', 'created_at'],
         where: { user_id: user_id },
         order: [[{model: Diary}, 'id', 'desc']],
         include: {
@@ -113,6 +113,7 @@ const getUserInfo = async (req, res) => {
         email: result1.email,
         birth: result1.birth,
         image: result1.image,
+        message: result1.message,
         allow_random: result1.allow_random,
         pages_count: count,
         create_at: result1.create_at,
@@ -176,17 +177,35 @@ const deleteUser = async (req, res) => {
     res.send({ success: true, data: result});
 }
 
+// 회원가입 시 아이디 중복체크, 일기장 생성 시 user 체크용
 const checkUserId = async (req, res) => {
+    const login_id = req.user_id; // token이 있을 경우
     const user_id = req.body.user_id;
     try {
-        const result = await User.findOne({
-            where: { user_id: user_id },
-        });
-        console.log(result);
-        if (result)
-            res.status(201).send({ success: true, result: "존재하는 ID입니다." });
-        else
-            res.send({ success: false, message: "존재하지 않는 ID입니다." });
+        if (user_id == null || user_id == "") {
+                res.send({ success: false, message: "아이디를 입력해주세요." });
+        } else {
+            const result = await User.findOne({
+                    where: { user_id: user_id },
+                });
+            console.log(result);
+            console.log(user_id);
+            if (login_id) {
+                if (login_id === user_id) // 초대
+                    res.send({ success: false, message: "본인을 초대할 수 없습니다." });
+                else if (result)
+                    res.status(201).send({ success: true, message: "초대 가능한 사용자입니다." });
+                else 
+                    res.send({ success: false, message: "초대할 수 없는 사용자입니다. 아이디를 확인해주세요." });
+            }
+            else { // 회원가입
+                if (result)
+                    res.status(201).send({ success: false, message: "이미 존재하는 아이디입니다. 다른 아이디를 사용해주세요." });
+                else
+                    res.send({ success: true, message: "사용 가능한 아이디입니다." });
+            
+            }
+        }
     } catch(error) {
         res.status(500).send({ success: false, message: error.message });
     }
@@ -241,5 +260,5 @@ module.exports = {
     deleteUser,
     checkUserId,
     checkPassword,
-    updatePassword
+    updatePassword,
 };
