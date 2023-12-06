@@ -12,7 +12,8 @@ const getPageList = async (req, res) => {
             model: Page,
             include: [{
                 attributes: ['user_id', 'name'],
-                model: User
+                model: User,
+                required: false, // 외부 조인
             }],
         }],
     });
@@ -24,7 +25,7 @@ const getPageList = async (req, res) => {
     const [result2, metadata] = await sequelize.query(`
             SELECT u.user_id, u.name, u.image, u.message, u.birth, uhd.accept_date, uhd.status
             FROM userhasdiary uhd, diaries d, users u
-            WHERE uhd.diary_id = d.id AND d.id = ${diary_id} AND uhd.user_id = u.user_id
+            WHERE uhd.diary_id = d.id AND d.id = ${diary_id} AND uhd.user_id = u.user_id AND u.deleted_at IS NULL
             ORDER by uhd.accept_date;
             `)
 
@@ -36,8 +37,10 @@ const getPageList = async (req, res) => {
                 contents: diary.Page.contents,
                 created_at: diary.Page.dataValues.created_at,
                 deleted: diary.Page.deleted,
-                user_id: diary.Page.User.user_id,
-                name: diary.Page.User.name,
+                // user_id: diary.Page.User.user_id,
+                // name: diary.Page.User.name,
+                user_id: (diary.Page.User) ? diary.Page.User.user_id : "null",
+                name: (diary.Page.User) ? diary.Page.User.user_id : "null",
             }
         })
     }
@@ -71,9 +74,15 @@ const getPage = async (req, res) => {
                 where: { id: page_id },
                 include: {
                     attributes: ['name'],
-                    model: User}
+                    model: User},
             },
                 );
+
+        console.log(result.User);
+        if (!result.User) {
+            result.dataValues.User = { name : null }
+        }
+        console.log(result);
         res.send({ success: true, page: result });
     } catch(error) {
         res.send({ success: false, message: error.message });
