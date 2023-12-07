@@ -1,43 +1,34 @@
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
 const Sequelize = require('sequelize');
-const process = require('process');
-const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
+const config = require(__dirname + '/../config/config.js')[env];
 const db = {};
 
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
-
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (
-      file.indexOf('.') !== 0 &&
-      file !== basename &&
-      file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
-    );
-  })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
-  });
-
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
+let sequelize = new Sequelize(config.database, config.username, config.password, config);
 
 db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+
+const User = require('./User.js');
+const Diary = require('./Diary.js');
+const UserHasDiary = require('./UserHasDiary.js');
+const Page = require('./Page.js');
+const Category = require('./Category.js');
+
+db.User = User;
+db.Diary = Diary;
+db.UserHasDiary = UserHasDiary;
+db.Page = Page;
+db.Category = Category;
+
+User.init(sequelize);
+Diary.init(sequelize);
+UserHasDiary.init(sequelize);
+Page.init(sequelize);
+Category.init(sequelize);
+  
+User.associate(db);
+Diary.associate(db);
+UserHasDiary.associate(db);
+Page.associate(db);
+Category.associate(db);
 
 module.exports = db;
