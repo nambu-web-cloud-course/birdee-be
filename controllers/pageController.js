@@ -39,8 +39,8 @@ const getPageList = async (req, res) => {
                 deleted: diary.Page.deleted,
                 // user_id: diary.Page.User.user_id,
                 // name: diary.Page.User.name,
-                user_id: (diary.Page.User) ? diary.Page.User.user_id : "null",
-                name: (diary.Page.User) ? diary.Page.User.user_id : "null",
+                user_id: (diary.Page.User) ? diary.Page.User.user_id : "탈퇴한 사용자",
+                name: (diary.Page.User) ? diary.Page.User.name : "탈퇴한 사용자",
             }
         })
     }
@@ -78,11 +78,9 @@ const getPage = async (req, res) => {
             },
                 );
 
-        console.log(result.User);
         if (!result.User) {
             result.dataValues.User = { name : null }
         }
-        console.log(result);
         res.send({ success: true, page: result });
     } catch(error) {
         res.send({ success: false, message: error.message });
