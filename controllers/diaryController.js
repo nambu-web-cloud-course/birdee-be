@@ -207,8 +207,8 @@ const toggleDiaryVisibility = async (req, res) => {
 const deleteDiary = async (req, res) => {
     const diary_id = req.params.id;
     const currentDate = new Date();
-    // const nextDay = new Date(currentDate.getTime() + (24 * 60 * 60 * 1000)); 
-    const nextDay = new Date(currentDate.getTime() + 60000); // 60000 밀리초 = 1분, Test용 1분뒤 삭제 예정
+    const nextDay = new Date(currentDate.getTime() + (24 * 60 * 60 * 1000)); 
+    // const nextDay = new Date(currentDate.getTime() + 60000); // 60000 밀리초 = 1분, Test용 1분뒤 삭제 예정
     console.log(`currentDate: ${currentDate}, nextDay: ${nextDay}`);
     const result = await Diary.update({
         "deleted": 'scheduled', //삭제 예정
